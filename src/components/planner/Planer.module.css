@@ -1,0 +1,449 @@
+
+/* Modern Planner Redesign */
+
+.plannerWrapper {
+  min-height: 100vh;
+  background: repeating-linear-gradient(0deg, var(--color-paper) 0px, var(--color-paper) 39px, #e5e7eb 40px, var(--color-paper) 41px);
+  padding: 3.5rem 2.5rem 2.5rem 2.5rem;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  color: var(--color-ink);
+  box-sizing: border-box;
+  pointer-events: none; /* Non-interactive display-only */
+  user-select: none;
+}
+
+.debugMode {
+  pointer-events: auto;
+  user-select: text;
+}
+
+.debugBanner {
+  position: relative;
+  max-width: 700px;
+  margin: 0 auto 1.2rem auto;
+  padding: 0.75rem 1rem;
+  background: repeating-linear-gradient(45deg,#fff,#fff 6px,#ffe1c5 6px,#ffe1c5 12px);
+  border: 2px dashed #ff8800;
+  font-family: 'Inter', 'Roboto', Arial, sans-serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  color: #181818;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+/* Flipchart holes */
+.holeLeft, .holeCenter, .holeRight {
+  position: absolute;
+  top: 12px;
+  width: 32px;
+  height: 32px;
+  background: #e5e7eb;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px #bbb inset;
+  z-index: 10;
+}
+.holeLeft { left: 12vw; }
+.holeCenter { left: 50%; transform: translateX(-50%); }
+.holeRight { right: 12vw; }
+
+/* Torn edge at the top */
+.tornEdge {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 38px;
+  background: #fffbe7;
+  z-index: 9;
+  clip-path: polygon(0 0, 2% 40%, 4% 20%, 6% 50%, 8% 30%, 10% 60%, 12% 25%, 14% 55%, 16% 35%, 18% 65%, 20% 30%, 22% 50%, 24% 40%, 26% 60%, 28% 35%, 30% 55%, 32% 45%, 34% 65%, 36% 40%, 38% 60%, 40% 30%, 42% 50%, 44% 35%, 46% 55%, 48% 40%, 50% 60%, 52% 35%, 54% 55%, 56% 45%, 58% 65%, 60% 40%, 62% 60%, 64% 30%, 66% 50%, 68% 35%, 70% 55%, 72% 45%, 74% 65%, 76% 40%, 78% 60%, 80% 30%, 82% 50%, 84% 35%, 86% 55%, 88% 40%, 90% 60%, 92% 35%, 94% 55%, 96% 45%, 98% 65%, 100% 40%, 100% 100%, 0 100%);
+}
+
+/* Hand-drawn squiggle under header */
+
+
+/* Playful background doodles */
+.doodleStar {
+  position: absolute;
+  top: 40px;
+  left: 10vw;
+  width: 60px;
+  height: 60px;
+  background: url('data:image/svg+xml;utf8,<svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="30,5 36,22 55,22 39,34 45,51 30,40 15,51 21,34 5,22 24,22" fill="%23ffe066" stroke="%23f59e42" stroke-width="3"/></svg>') no-repeat center/contain;
+  opacity: 0.7;
+  z-index: 0;
+}
+.doodleCircle {
+  position: absolute;
+  bottom: 80px;
+  right: 8vw;
+  width: 80px;
+  height: 80px;
+  background: radial-gradient(circle at 30% 30%, #a5f3fc 70%, #38bdf8 100%);
+  border-radius: 50%;
+  opacity: 0.5;
+  z-index: 0;
+}
+.doodleSquiggle {
+  position: absolute;
+  top: 60%;
+  left: 50%;
+  width: 100px;
+  height: 30px;
+  background: url('data:image/svg+xml;utf8,<svg width="100" height="30" viewBox="0 0 100 30" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 20 Q 25 5, 50 20 T 95 20" stroke="%23f472b6" stroke-width="5" fill="none"/></svg>') no-repeat center/contain;
+  opacity: 0.5;
+  z-index: 0;
+  transform: translate(-50%, -50%);
+}
+
+.header {
+  max-width: 700px;
+  margin: 0 auto 2.5rem auto;
+  padding: 2.5rem 2.5rem 2rem 2.5rem;
+  background: var(--color-paper);
+  border-radius: 1.5rem 1.5rem 1.2rem 1.2rem;
+  box-shadow: 0 4px 24px 0 rgba(0,0,0,0.09);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+  border: 2.5px solid var(--color-ink);
+  font-family: 'Gloria Hallelujah', 'Caveat', 'Comic Neue', cursive, sans-serif;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: var(--color-ink);
+  font-family: 'Gloria Hallelujah', 'Caveat', 'Comic Neue', cursive, sans-serif;
+  margin-bottom: 0.2em;
+  letter-spacing: 0.01em;
+  text-shadow: 1px 2px 0 #fff, 0 4px 12px #fbbf24;
+}
+
+.date {
+  font-size: 1.2rem;
+  color: #4a5568;
+  font-family: 'Inter', 'Roboto', Arial, sans-serif;
+}
+
+.time {
+  font-size: 1rem;
+  color: #64748b;
+  font-family: 'Inter', 'Roboto', Arial, sans-serif;
+}
+
+/* Prominent live clock */
+.clockDisplay {
+  position: sticky;
+  top: 0;
+  margin: 0 auto 2rem auto;
+  background: #181818;
+  color: #fff;
+  padding: 0.65rem 1.25rem 0.8rem 1.25rem;
+  border: 3px solid #181818;
+  border-radius: 18px;
+  font-family: 'Inter', 'Roboto Mono', 'Roboto', Arial, sans-serif;
+  font-size: 2.15rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  box-shadow: 4px 6px 0 #fbbf24, 0 4px 18px rgba(0,0,0,0.28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  z-index: 30;
+  width: 100%;
+  max-width: 700px;
+  backdrop-filter: blur(2px);
+}
+.clockDisplay span { display: inline-block; line-height: 1; }
+.clockLabel { font-size: 0.85rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #fbbf24; }
+@media (max-width: 720px) {
+  .clockDisplay { font-size: 1.7rem; border-radius: 14px; box-shadow: 3px 5px 0 #fbbf24, 0 3px 12px rgba(0,0,0,0.22); }
+}
+
+/* Side fixed clock */
+.clockSide {
+  position: fixed;
+  top: 50%;
+  right: 1.5rem;
+  transform: translateY(-50%);
+  background: #181818;
+  color: #fff;
+  padding: 1rem 1.25rem 1.1rem 1.25rem;
+  border: 3px solid #181818;
+  border-radius: 26px;
+  font-family: 'Inter', 'Roboto Mono', 'Roboto', Arial, sans-serif;
+  font-size: 2.4rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  box-shadow: 6px 8px 0 #fbbf24, 0 6px 24px rgba(0,0,0,0.30);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  z-index: 120;
+  pointer-events: none;
+}
+.clockSide span { line-height: 1; }
+@media (max-width: 900px) {
+  .clockSide {
+    top: auto;
+    bottom: 1rem;
+    right: 50%;
+    transform: translateX(50%);
+    font-size: 1.9rem;
+    box-shadow: 4px 6px 0 #fbbf24, 0 4px 18px rgba(0,0,0,0.28);
+  }
+}
+
+.scheduleGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  max-width: 700px;
+  margin: 0 auto;
+  width: 100%;
+  padding-bottom: 2rem;
+}
+
+/* Sticky note hand-drawn card */
+.card {
+  background: #fff;
+  /* Imperfect corners for hand-cut look */
+  border-radius: 1.05rem 1.35rem 1.15rem 1.0rem;
+  box-shadow: 2px 6px 0 #e5e7eb, 0 2px 12px 0 rgba(0,0,0,0.10);
+  padding: 2rem 2rem 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  border: 2.5px solid var(--color-ink);
+  position: relative;
+  z-index: 1;
+  font-family: 'Gloria Hallelujah', 'Caveat', 'Comic Neue', cursive, sans-serif;
+  box-sizing: border-box;
+  overflow: visible;
+}
+/* Natural slight skew/rounding per card for organic feel */
+.scheduleGrid article.card:nth-child(odd) {
+  transform: rotate(-0.4deg) skewX(-0.2deg);
+  border-radius: 1.0rem 1.4rem 1.2rem 0.95rem;
+}
+.scheduleGrid article.card:nth-child(even) {
+  transform: rotate(0.5deg) skewX(0.2deg);
+  border-radius: 1.1rem 1.3rem 1.0rem 1.15rem;
+}
+.scheduleGrid article.card:nth-child(3n) {
+  transform: rotate(-0.6deg) skewY(0.2deg);
+  border-radius: 0.95rem 1.25rem 1.2rem 1.05rem;
+}
+.scheduleGrid article.card:nth-child(5n) {
+  transform: rotate(0.3deg) skewY(-0.2deg);
+  border-radius: 1.15rem 1.0rem 1.25rem 1.05rem;
+}
+/* Tape effect on sticky notes */
+.tape {
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  width: 60px;
+  height: 22px;
+  background: repeating-linear-gradient(135deg, #fffbe7 0 8px, #fbbf24 8px 16px);
+  border-radius: 8px;
+  border: 2px solid #eab308;
+  box-shadow: 0 2px 6px #eab30844;
+  transform: translateX(-50%) rotate(-4deg);
+  z-index: 2;
+}
+/* Playful accent colors for cards */
+/* Hand-drawn marker fill via pseudo element */
+.card::before {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  right: -6px;
+  bottom: -12px;
+  z-index: -1;
+  /* Slightly uneven border radius */
+  border-radius: 17px 20px 18px 16px;
+  filter: brightness(1.02);
+  opacity: 0.85;
+  /* Default edge variant (A) with rougher cuts */
+  clip-path: polygon(3% 7%, 95% 3%, 100% 22%, 98% 87%, 92% 99%, 9% 100%, 0 82%, 2% 19%);
+  box-shadow: 0 2px 0 var(--color-ink), 0 0 0 3px rgba(0,0,0,0.05) inset;
+}
+/* Edge variant B: more torn on right */
+.edgeB.card::before {
+  clip-path: polygon(5% 9%, 93% 4%, 100% 27%, 98% 83%, 89% 100%, 10% 100%, 0 76%, 3% 20%);
+}
+/* Edge variant C: more torn on left */
+.edgeC.card::before {
+  clip-path: polygon(2% 11%, 96% 5%, 100% 23%, 98% 85%, 92% 99%, 11% 100%, 0 85%, 5% 25%);
+}
+/* Subtle per-card variation for hand-drawn feel */
+.scheduleGrid article.card:nth-child(odd)::before {
+  filter: brightness(1.03) saturate(1.03);
+  transform: translateY(-2px) rotate(-0.8deg);
+}
+.scheduleGrid article.card:nth-child(even)::before {
+  filter: brightness(1.01) saturate(1.03);
+  transform: translateY(-1px) rotate(0.9deg);
+}
+.scheduleGrid article.card:nth-child(3n)::before {
+  filter: brightness(1.02) hue-rotate(6deg);
+}
+.scheduleGrid article.card:nth-child(5n)::before {
+  filter: brightness(1.02) hue-rotate(-6deg);
+}
+.scheduleGrid article.card:nth-child(7n)::before {
+  transform: translateY(-3px) rotate(-1.1deg);
+}
+/* Per-category marker colors */
+.type_session.card::before { background: var(--color-session); }
+.type_workshop.card::before { background: var(--color-workshop); }
+.type_break.card::before { background: var(--color-break); }
+.type_announcement.card::before { background: var(--color-announcement); }
+.type_game.card::before { background: var(--color-game); }
+.type_transition.card::before { background: var(--color-transition); }
+
+/* Past state dims marker fill */
+.past.card::before {
+  opacity: 0.45;
+  filter: grayscale(0.3) brightness(0.95);
+.scheduleGrid article.card:nth-child(5n) .tape { transform: translateX(-50%) rotate(-6deg); }
+/* More rounded tape edges sometimes */
+.scheduleGrid article.card:nth-child(odd) .tape { border-radius: 10px; }
+.scheduleGrid article.card:nth-child(3n) .tape { border-radius: 7px; }
+}
+.past {
+  opacity: 0.5;
+  border-left-color: #a0aec0;
+}
+.cardTime {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #181818;
+  letter-spacing: 0.04em;
+  font-family: 'Gloria Hallelujah', 'Caveat', 'Comic Neue', cursive, sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+}
+/* Breaks look distinct */
+.type_break.card {
+  border-style: dashed;
+  border-color: var(--color-amber-700); /* amber-700 */
+  background: linear-gradient(180deg, #fffbea 0%, #fff8d6 100%);
+}
+.type_break .tape {
+  transform: translateX(-50%) rotate(2deg);
+  width: 82px;
+  background: repeating-linear-gradient(135deg, #fffbe7 0 10px, #f59e0b 10px 20px);
+}
+.type_break .cardTime { color: var(--color-amber-900); }
+.type_break .icon { color: var(--color-amber-900); }
+.pastEmoji {
+  margin-left: 0.3em;
+  font-size: 1.1em;
+}
+.cardContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.cardTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #181818;
+  margin-bottom: 0.1em;
+  font-family: 'Gloria Hallelujah', 'Caveat', 'Comic Neue', cursive, sans-serif;
+  letter-spacing: 0.01em;
+}
+.cardHeaderRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.categoryBadge {
+  text-transform: uppercase;
+  font-size: 0.55rem;
+  letter-spacing: 0.15em;
+  font-weight: 700;
+  padding: 0.35rem 0.55rem 0.3rem 0.55rem;
+  border: 2px solid #181818;
+  border-radius: 10px;
+  background: #fff;
+  font-family: 'Inter','Roboto',Arial,sans-serif;
+  box-shadow: 2px 3px 0 #18181833;
+}
+.cat_session { background: #d0f0ff; }
+.cat_workshop { background: #e9ddff; }
+.cat_break { background: #fff7b3; }
+.cat_announcement { background: #ffd4ec; }
+.cat_game { background: #d9fdd2; }
+.cat_transition { background: #ffe1c5; }
+.cardLocation {
+  font-size: 1rem;
+  color: #1e293b;
+  font-family: 'Inter', 'Roboto', Arial, sans-serif;
+  display: flex;
+  align-items: center;
+}
+.cardSpeaker {
+  font-size: 0.95rem;
+  color: #334155;
+  font-family: 'Inter', 'Roboto', Arial, sans-serif;
+  display: flex;
+  align-items: center;
+}
+.cardDetails {
+  font-size: 0.95rem;
+  color: #181818;
+  font-family: 'Inter', 'Roboto', Arial, sans-serif;
+  margin-top: 0.2em;
+  display: flex;
+  align-items: flex-start;
+}
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.5rem;
+  stroke-width: 2.5;
+  color: var(--color-ink);
+}
+.footerIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.6rem;
+/* Slight tape angle variation per card */
+.scheduleGrid article.card:nth-child(odd) .tape { transform: translateX(-50%) rotate(-3deg); }
+.scheduleGrid article.card:nth-child(even) .tape { transform: translateX(-50%) rotate(-5deg); }
+.scheduleGrid article.card:nth-child(3n) .tape { transform: translateX(-50%) rotate(-2deg); }
+  stroke-width: 2.5;
+  color: var(--color-ink);
+}
+.emptyMsg {
+  grid-column: 1/-1;
+  text-align: center;
+  color: var(--color-ink);
+  font-size: 1.1rem;
+  padding: 2rem 0;
+}
+.footer {
+  margin: 3rem auto 2.5rem auto;
+  text-align: center;
+  color: var(--color-ink);
+  font-size: 1.2rem;
+  font-family: 'Gloria Hallelujah', 'Caveat', 'Comic Neue', cursive, sans-serif;
+  text-shadow: 0 2px 8px #fff7ae;
+  padding: 1.2rem 0 0.5rem 0;
+}
