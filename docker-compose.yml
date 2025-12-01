@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   app:
-    image: ghcr.io/lu2adev80/konfidayplaner:latest
+    image: luca3008/konfidayplaner:latest
     ports:
       - '8080:80'
     restart: unless-stopped

@@ -21,12 +21,11 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
 
-    - name: Log in to GitHub Container Registry
+    - name: Log in to Docker Hub
       uses: docker/login-action@v2
       with:
-        registry: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
 
     - name: Build and push Docker image
       uses: docker/build-push-action@v2
@@ -34,12 +33,12 @@ jobs:
         context: .
         push: true
         tags: |
-          ghcr.io/lu2adev80/konfidayplaner:latest
-          ghcr.io/lu2adev80/konfidayplaner:${{ github.sha }}
+          ${{ secrets.DOCKER_USERNAME }}/konfidayplaner:latest
+          ${{ secrets.DOCKER_USERNAME }}/konfidayplaner:${{ github.sha }}
 
     - name: Deployment Info
       run: |
-        echo "✅ Image pushed to GitHub Container Registry"
-        echo "📦 Image: ghcr.io/lu2adev80/konfidayplaner:latest"
+        echo "✅ Image pushed to Docker Hub"
+        echo "📦 Image: ${{ secrets.DOCKER_USERNAME }}/konfidayplaner:latest"
         echo "🔄 Watchtower on the server will automatically update the container within 5 minutes"
         echo "🌐 URL: http://lu2adevelopment.de/minihackathon/"
