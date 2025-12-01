@@ -4,7 +4,7 @@ import Home from "./pages/Home";
 import DisplayRegister from "./pages/DisplayRegister";
 import PlannerPage from "./pages/PlannerPage";
 import Admin from "./pages/Admin";
-import OrganisationSelect from "./pages/OrganisationSelect";
+import AdminLogin from "./pages/AdminLogin";
 import Dashboard from "./pages/Dashboard";
 import Documentation from "./pages/Documentation";
 
@@ -13,14 +13,8 @@ function App() {
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/documentation" element={<Documentation />} />
-      <Route path="/login" element={<Admin />}>
-        <Route index element={<OrganisationSelect />} />
-        <Route path="select" element={<OrganisationSelect />} />
-        <Route path="dashboard" element={<Dashboard />} />
-      </Route>
+      <Route path="/login" element={<AdminLogin />} />
       <Route path="/admin" element={<Admin />}>
-        <Route index element={<OrganisationSelect />} />
-        <Route path="select" element={<OrganisationSelect />} />
         <Route path="dashboard" element={<Dashboard />} />
       </Route>
       <Route path="/register-display" element={<DisplayRegister />} />
