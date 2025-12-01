@@ -9,7 +9,11 @@ import {
   Edit3, 
   ChevronRight,
   LogIn,
-  ArrowLeft
+  ArrowLeft,
+  BookOpen,
+  Lightbulb,
+  Target,
+  HelpCircle
 } from 'lucide-react';
 import FlipchartBackground from '../components/layout/FlipchartBackground';
 import styles from './Admin.module.css';
@@ -18,7 +22,7 @@ const Documentation: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <div className={styles.adminWrapper} role="main" aria-label="KonfiDayPlaner Dokumentation">
+    <div className={styles.adminWrapper} role="main" aria-label="Chaos Ops Dokumentation">
       <FlipchartBackground />
       
       <main className={styles.adminContent} style={{ 
@@ -85,9 +89,14 @@ const Documentation: React.FC = () => {
               fontWeight: '800',
               color: '#181818',
               marginBottom: '0.5rem',
-              letterSpacing: '0.01em'
+              letterSpacing: '0.01em',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.5rem'
             }}>
-              📚 Dokumentation
+              <BookOpen size={40} color="#fbbf24" />
+              Dokumentation
             </h1>
             <p style={{ 
               fontFamily: '"Inter", "Roboto", Arial, sans-serif',
@@ -95,7 +104,7 @@ const Documentation: React.FC = () => {
               color: '#4a5568',
               lineHeight: '1.6'
             }}>
-              Lerne, wie du KonfiDayPlaner optimal nutzt
+              Lerne, wie du Chaos Ops optimal nutzt
             </p>
           </div>
         </div>
@@ -121,7 +130,7 @@ const Documentation: React.FC = () => {
             gap: '0.5rem'
           }}>
             <Calendar size={28} color="#fbbf24" />
-            Was ist KonfiDayPlaner?
+            Was ist Chaos Ops?
           </h2>
           <p style={{
             fontFamily: '"Inter", "Roboto", Arial, sans-serif',
@@ -130,7 +139,7 @@ const Documentation: React.FC = () => {
             lineHeight: '1.7',
             marginBottom: '1rem'
           }}>
-            KonfiDayPlaner ist ein digitales Planungssystem für Jugendgruppen-Events und 
+            Chaos Ops ist ein digitales Planungssystem für Jugendgruppen-Events und 
             Konfi-Tage. Es ermöglicht dir, Tagespläne zu erstellen und diese auf verschiedenen 
             Displays in Echtzeit anzuzeigen.
           </p>
@@ -525,7 +534,8 @@ const Documentation: React.FC = () => {
             alignItems: 'center',
             gap: '0.5rem'
           }}>
-            💡 Tipps & Best Practices
+            <Lightbulb size={28} color="#fbbf24" />
+            Tipps & Best Practices
           </h2>
 
           <div style={{
@@ -540,10 +550,14 @@ const Documentation: React.FC = () => {
               fontSize: '1rem',
               color: '#4a5568',
               lineHeight: '1.7',
-              margin: 0
+              margin: 0,
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '0.5rem'
             }}>
-              <strong>💡 Tipp 1:</strong> Plane Pufferzeiten ein! Zwischen Aktivitäten sollten 
-              immer einige Minuten Pause liegen.
+              <Lightbulb size={20} color="#fbbf24" style={{ flexShrink: 0, marginTop: '2px' }} />
+              <span><strong>Tipp 1:</strong> Plane Pufferzeiten ein! Zwischen Aktivitäten sollten 
+              immer einige Minuten Pause liegen.</span>
             </p>
           </div>
 
@@ -559,10 +573,14 @@ const Documentation: React.FC = () => {
               fontSize: '1rem',
               color: '#4a5568',
               lineHeight: '1.7',
-              margin: 0
+              margin: 0,
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '0.5rem'
             }}>
-              <strong>💡 Tipp 2:</strong> Verwende kurze, prägnante Titel für bessere Lesbarkeit 
-              auf dem Display (max. 3-4 Wörter).
+              <Lightbulb size={20} color="#fbbf24" style={{ flexShrink: 0, marginTop: '2px' }} />
+              <span><strong>Tipp 2:</strong> Verwende kurze, prägnante Titel für bessere Lesbarkeit 
+              auf dem Display (max. 3-4 Wörter).</span>
             </p>
           </div>
 
@@ -578,10 +596,14 @@ const Documentation: React.FC = () => {
               fontSize: '1rem',
               color: '#4a5568',
               lineHeight: '1.7',
-              margin: 0
+              margin: 0,
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '0.5rem'
             }}>
-              <strong>💡 Tipp 3:</strong> Registriere Displays im Vollbildmodus (F11) für eine 
-              optimale Anzeige ohne Browser-Elemente.
+              <Lightbulb size={20} color="#fbbf24" style={{ flexShrink: 0, marginTop: '2px' }} />
+              <span><strong>Tipp 3:</strong> Registriere Displays im Vollbildmodus (F11) für eine 
+              optimale Anzeige ohne Browser-Elemente.</span>
             </p>
           </div>
 
@@ -596,10 +618,14 @@ const Documentation: React.FC = () => {
               fontSize: '1rem',
               color: '#4a5568',
               lineHeight: '1.7',
-              margin: 0
+              margin: 0,
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '0.5rem'
             }}>
-              <strong>💡 Tipp 4:</strong> Teste deine Pläne vorab auf dem Display, um zu sehen, 
-              wie sie in der echten Umgebung aussehen.
+              <Lightbulb size={20} color="#fbbf24" style={{ flexShrink: 0, marginTop: '2px' }} />
+              <span><strong>Tipp 4:</strong> Teste deine Pläne vorab auf dem Display, um zu sehen, 
+              wie sie in der echten Umgebung aussehen.</span>
             </p>
           </div>
         </section>
@@ -624,7 +650,8 @@ const Documentation: React.FC = () => {
             alignItems: 'center',
             gap: '0.5rem'
           }}>
-            🎯 Anwendungsbeispiele
+            <Target size={28} color="#fbbf24" />
+            Anwendungsbeispiele
           </h2>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -720,9 +747,13 @@ const Documentation: React.FC = () => {
             fontSize: '1.8rem',
             fontWeight: '700',
             color: '#181818',
-            marginBottom: '1.5rem'
+            marginBottom: '1.5rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
           }}>
-            ❓ Häufig gestellte Fragen
+            <HelpCircle size={28} color="#fbbf24" />
+            Häufig gestellte Fragen
           </h2>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -885,7 +916,7 @@ const Documentation: React.FC = () => {
         <span className={styles.footerIcon} aria-hidden="true">
           <Home size={16} />
         </span>
-        <span>KonfiDayPlaner – Deine Events, deine Planung</span>
+        <span>Chaos Ops – Deine Events, deine Planung</span>
       </footer>
     </div>
   );
