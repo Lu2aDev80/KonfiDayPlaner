@@ -6,17 +6,25 @@ import styles from './Admin.module.css';
 
 const Admin: React.FC = () => {
   const location = useLocation();
-  const isRootAdmin = location.pathname === '/admin';
-  const isDashboard = location.pathname.startsWith('/admin/dashboard');
+  const isRootAdmin =
+    location.pathname === "/admin" || location.pathname === "/login";
+  const isDashboard =
+    location.pathname.startsWith("/admin/dashboard") ||
+    location.pathname.startsWith("/login/dashboard");
 
   return (
     <div className={styles.adminWrapper} role="main" aria-label="Admin Bereich">
       <FlipchartBackground />
-      
+
       <main className={styles.adminContent}>
         {isRootAdmin ? (
           // Redirect to organization selection
-          <Navigate to="/admin/select" replace />
+          <Navigate
+            to={
+              location.pathname === "/login" ? "/login/select" : "/admin/select"
+            }
+            replace
+          />
         ) : isDashboard ? (
           // Show dashboard without card wrapper
           <Outlet />
@@ -30,7 +38,7 @@ const Admin: React.FC = () => {
           </div>
         )}
       </main>
-      
+
       <footer className={styles.footer}>
         <span className={styles.footerIcon} aria-hidden="true">
           <Settings size={16} />
