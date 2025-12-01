@@ -12,8 +12,9 @@ RUN npm run build
 # Production stage
 FROM nginx:alpine
 
-# Copy built files to nginx
-COPY --from=builder /usr/src/app/dist /usr/share/nginx/html
+# Create minihackathon directory and copy built files there
+RUN mkdir -p /usr/share/nginx/html/minihackathon
+COPY --from=builder /usr/src/app/dist /usr/share/nginx/html/minihackathon
 
 # Copy nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf
