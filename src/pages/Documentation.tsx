@@ -841,7 +841,7 @@ const Documentation: React.FC = () => {
                 lineHeight: '1.7',
                 margin: 0
               }}>
-                KonfiDayPlaner funktioniert auf allen modernen Browsern (Chrome, Firefox, Safari, Edge). 
+                Chaos Ops funktioniert auf allen modernen Browsern (Chrome, Firefox, Safari, Edge). 
                 Optimal auf Tablets (10"+), Monitoren und Desktop-PCs. Auch auf Smartphones nutzbar.
               </p>
             </div>

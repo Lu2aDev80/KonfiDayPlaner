@@ -21,9 +21,17 @@ const ScheduleCard: React.FC<ScheduleCardProps> = ({ item, isPassed, debug, onRe
       ref={onRef as any}
     >
       <div className={styles.tape} aria-hidden="true"></div>
+      
       <div className={styles.cardTime} aria-label={`Zeit: ${item.time}`}>
         <span className={styles.icon} aria-hidden="true"><Hourglass size={18} /></span>
-        <span>{item.time}</span>
+        {item.timeChanged ? (
+          <div className={styles.timeChangeWrapper}>
+            <span className={styles.newTime}>{item.time}</span>
+            <span className={styles.oldTime}>{item.originalTime}</span>
+          </div>
+        ) : (
+          <span>{item.time}</span>
+        )}
         {isPassed && <span className={styles.pastEmoji} aria-label="Vergangener Termin">(vorbei)</span>}
       </div>
       <div className={styles.cardContent}>

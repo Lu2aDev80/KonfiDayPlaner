@@ -29,6 +29,9 @@ const typeColors: Record<string, { bg: string; border: string; icon: string }> =
 const ScheduleManager: React.FC<ScheduleManagerProps> = ({ schedule, onSave, onCancel }) => {
   const [items, setItems] = useState<ScheduleItem[]>(schedule);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  
+  // Store original schedule for change detection
+  const [originalSchedule] = useState<ScheduleItem[]>(JSON.parse(JSON.stringify(schedule)));
 
   const addItem = () => {
     const lastTime = items.length > 0 ? items[items.length - 1].time : '09:00';
@@ -49,6 +52,19 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ schedule, onSave, onC
 
   const updateItem = (index: number, updates: Partial<ScheduleItem>) => {
     const newItems = [...items];
+    const currentItem = newItems[index];
+    const originalItem = originalSchedule.find(orig => orig.id === currentItem.id);
+    
+    // Check for time changes
+    if (updates.time && originalItem && updates.time !== originalItem.time) {
+      updates.timeChanged = true;
+      updates.originalTime = originalItem.time;
+    } else if (updates.time && originalItem && updates.time === originalItem.time) {
+      // Time was restored to original
+      updates.timeChanged = false;
+      updates.originalTime = undefined;
+    }
+    
     newItems[index] = { ...newItems[index], ...updates };
     setItems(newItems);
   };
@@ -64,6 +80,19 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({ schedule, onSave, onC
     const newItems = [...items];
     const targetIndex = direction === 'up' ? index - 1 : index + 1;
     [newItems[index], newItems[targetIndex]] = [newItems[targetIndex], newItems[index]];
+    
+    // Mark position changes
+    newItems.forEach((item, idx) => {
+      const originalIndex = originalSchedule.findIndex(orig => orig.id === item.id);
+      if (originalIndex !== -1 && originalIndex !== idx) {
+        item.positionChanged = true;
+        item.originalPosition = originalIndex;
+      } else if (originalIndex === idx) {
+        item.positionChanged = false;
+        item.originalPosition = undefined;
+      }
+    });
+    
     setItems(newItems);
   };
 

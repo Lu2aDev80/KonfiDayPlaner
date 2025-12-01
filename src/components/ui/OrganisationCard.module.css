@@ -18,6 +18,17 @@
   flex-direction: column;
   gap: 0.2rem;
 }
+
+@media (max-width: 640px) {
+  .organisationCard {
+    padding: 0.8rem 0.7rem;
+    font-size: 1rem;
+    gap: 0.1rem;
+  }
+  .organisationCard .description {
+    font-size: 0.93rem;
+  }
+}
 .organisationCard.selected {
   background: var(--color-ink);
   color: #fff;

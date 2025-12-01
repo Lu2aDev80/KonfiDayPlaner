@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import FlipchartBackground from "../components/layout/FlipchartBackground";
 import styles from "./Admin.module.css";
+import chaosOpsLogo from "../assets/Chaos-Ops Logo.png";
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
@@ -58,29 +59,21 @@ const Home: React.FC = () => {
               marginBottom: "1.5rem",
               display: "flex",
               justifyContent: "center",
-              gap: "1rem",
-              flexWrap: "wrap",
+              alignItems: "center",
             }}
           >
-            <Calendar size={48} color="#fbbf24" strokeWidth={2.5} />
-            <Clock size={48} color="#38bdf8" strokeWidth={2.5} />
-            <Users size={48} color="#a78bfa" strokeWidth={2.5} />
+            <img
+              src={chaosOpsLogo}
+              alt="Chaos Ops Logo"
+              style={{
+                maxWidth: "300px",
+                maxHeight: "120px",
+                width: "auto",
+                height: "auto",
+                filter: "drop-shadow(2px 4px 8px rgba(0,0,0,0.1))",
+              }}
+            />
           </div>
-
-          <h1
-            style={{
-              fontFamily:
-                '"Gloria Hallelujah", "Caveat", "Comic Neue", cursive, sans-serif',
-              fontSize: "clamp(2rem, 5vw, 2.8rem)",
-              fontWeight: "800",
-              color: "#181818",
-              marginBottom: "1rem",
-              letterSpacing: "0.01em",
-              textShadow: "1px 2px 0 #fff, 0 2px 8px #fbbf24",
-            }}
-          >
-            Chaos Ops
-          </h1>
 
           <p
             style={{
@@ -203,6 +196,61 @@ const Home: React.FC = () => {
             >
               <BookOpen size={20} />
               Dokumentation
+            </button>
+
+            {/* Development Test Button */}
+            <button
+              onClick={() => navigate("/planner")}
+              style={{
+                padding: "1rem 2rem",
+                border: "2px dashed #181818",
+                borderRadius: "8px",
+                fontSize: "1rem",
+                fontWeight: "600",
+                fontFamily: '"Inter", "Roboto", Arial, sans-serif',
+                backgroundColor: "#10b981",
+                color: "#fff",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "0.75rem",
+                transition: "all 0.2s ease",
+                boxShadow: "2px 4px 0 #181818",
+                textShadow: "0 1px 2px rgba(0,0,0,0.2)",
+                opacity: "0.9",
+                position: "relative",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-2px)";
+                e.currentTarget.style.boxShadow = "3px 6px 0 #181818";
+                e.currentTarget.style.opacity = "1";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow = "2px 4px 0 #181818";
+                e.currentTarget.style.opacity = "0.9";
+              }}
+              title="Entwicklungs-Test-Button für Planer"
+            >
+              <Calendar size={18} />
+              🧪 Planer testen (Dev)
+              <span
+                style={{
+                  position: "absolute",
+                  top: "-8px",
+                  right: "-8px",
+                  backgroundColor: "#ef4444",
+                  color: "#fff",
+                  fontSize: "0.7rem",
+                  padding: "2px 6px",
+                  borderRadius: "4px",
+                  border: "1px solid #181818",
+                  fontWeight: "bold",
+                }}
+              >
+                DEV
+              </span>
             </button>
           </div>
         </div>

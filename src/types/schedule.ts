@@ -6,6 +6,11 @@ export type SessionItem = {
   speaker?: string;
   location?: string;
   details?: string;
+  // Change tracking
+  timeChanged?: boolean;
+  positionChanged?: boolean;
+  originalTime?: string;
+  originalPosition?: number;
 };
 export type WorkshopItem = {
   id: number;
@@ -16,6 +21,11 @@ export type WorkshopItem = {
   location?: string;
   materials?: string;
   details?: string;
+  // Change tracking
+  timeChanged?: boolean;
+  positionChanged?: boolean;
+  originalTime?: string;
+  originalPosition?: number;
 };
 export type BreakItem = {
   id: number;
@@ -24,6 +34,11 @@ export type BreakItem = {
   title: string;
   duration?: string;
   snacks?: string;
+  // Change tracking
+  timeChanged?: boolean;
+  positionChanged?: boolean;
+  originalTime?: string;
+  originalPosition?: number;
 };
 export type AnnouncementItem = {
   id: number;
@@ -31,6 +46,11 @@ export type AnnouncementItem = {
   type: 'announcement';
   title: string;
   details?: string;
+  // Change tracking
+  timeChanged?: boolean;
+  positionChanged?: boolean;
+  originalTime?: string;
+  originalPosition?: number;
 };
 export type GameItem = {
   id: number;
@@ -41,12 +61,22 @@ export type GameItem = {
   location?: string;
   materials?: string;
   details?: string;
+  // Change tracking
+  timeChanged?: boolean;
+  positionChanged?: boolean;
+  originalTime?: string;
+  originalPosition?: number;
 };
 export type TransitionItem = {
   id: number;
   time: string;
   type: 'transition';
   title: string;
+  // Change tracking
+  timeChanged?: boolean;
+  positionChanged?: boolean;
+  originalTime?: string;
+  originalPosition?: number;
 };
 export type ScheduleItem =
   | SessionItem

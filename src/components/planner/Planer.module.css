@@ -390,6 +390,42 @@
 .cat_announcement { background: #ffd4ec; }
 .cat_game { background: #d9fdd2; }
 .cat_transition { background: #ffe1c5; }
+
+/* Time change indicator - strikethrough old, red new */
+.timeChangeWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  line-height: 1.2;
+}
+
+.newTime {
+  color: #dc2626;
+  font-weight: 900;
+  font-size: 1.1em;
+  text-shadow: 0 0 8px rgba(220, 38, 38, 0.3);
+  animation: highlightTime 2s ease-in-out infinite;
+}
+
+.oldTime {
+  color: #6b7280;
+  font-size: 0.85em;
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+  text-decoration-color: #ef4444;
+  opacity: 0.7;
+}
+
+@keyframes highlightTime {
+  0%, 100% {
+    color: #dc2626;
+  }
+  50% {
+    color: #ef4444;
+    text-shadow: 0 0 12px rgba(220, 38, 38, 0.5);
+  }
+}
+
 .cardLocation {
   font-size: 1rem;
   color: #1e293b;
