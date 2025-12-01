@@ -9,6 +9,9 @@ import {
 import FlipchartBackground from "../components/layout/FlipchartBackground";
 import styles from "./Admin.module.css";
 import chaosOpsLogo from "../assets/Chaos-Ops Logo.png";
+import successGremlin from '../assets/gremlins/erfolg.png';
+import hideGremlin from '../assets/gremlins/hide.png';
+import sleepGremlin from '../assets/gremlins/sleep.png';
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
@@ -365,6 +368,39 @@ const Home: React.FC = () => {
               an.
             </p>
           </div>
+        </div>
+
+        {/* Schlafender Gremlin für zukünftige Hilfe-Funktion */}
+        <div
+          style={{
+            position: "fixed",
+            bottom: "2rem",
+            right: "2rem",
+            zIndex: 1000,
+            cursor: "pointer",
+            transition: "transform 0.2s ease",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = "scale(1.1)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "scale(1)";
+          }}
+          onClick={() => {
+            // Hier später Hilfefunktion implementieren
+            console.log("Gremlin wurde angeklickt - Hilfe kommt bald!");
+          }}
+          title="Hilfe (coming soon)"
+        >
+          <img
+            src={sleepGremlin}
+            alt="Hilfe Gremlin"
+            style={{
+              width: "120px",
+              height: "120px",
+              objectFit: "contain",
+            }}
+          />
         </div>
       </main>
     </div>

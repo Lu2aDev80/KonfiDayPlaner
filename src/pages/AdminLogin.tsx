@@ -5,6 +5,9 @@ import FlipchartBackground from '../components/layout/FlipchartBackground';
 import { organisations } from '../data/organisations';
 import styles from './Admin.module.css';
 import chaosOpsLogo from '../assets/Chaos-Ops Logo.png';
+import loginGremlin from '../assets/gremlins/login.png';
+import successGremlin from '../assets/gremlins/erfolg.png';
+import sleepGremlin from '../assets/gremlins/sleep.png';
 
 const AdminLogin: React.FC = () => {
   const navigate = useNavigate();
@@ -132,6 +135,16 @@ const AdminLogin: React.FC = () => {
             }}>
               Admin Bereich
             </h1>
+            <img
+              src={loginGremlin}
+              alt="Login Gremlin"
+              style={{
+                width: '80px',
+                height: '80px',
+                objectFit: 'contain',
+                margin: '1rem 0',
+              }}
+            />
             <p style={{
               fontFamily: '"Inter", "Roboto", Arial, sans-serif',
               fontSize: '1.1rem',
@@ -244,6 +257,37 @@ const AdminLogin: React.FC = () => {
             ))}
           </div>
 
+          {selectedOrgId && (
+            <div style={{
+              textAlign: 'center',
+              padding: '1rem',
+              backgroundColor: '#f0fdf4',
+              borderRadius: '8px',
+              border: '2px solid #22c55e',
+              marginBottom: '1.5rem',
+            }}>
+              <img
+                src={successGremlin}
+                alt="Bereit!"
+                style={{
+                  width: '64px',
+                  height: '64px',
+                  objectFit: 'contain',
+                  marginBottom: '0.5rem',
+                }}
+              />
+              <p style={{
+                fontFamily: '"Inter", "Roboto", Arial, sans-serif',
+                fontSize: '1rem',
+                color: '#166534',
+                fontWeight: '600',
+                margin: 0,
+              }}>
+                Bereit für das Dashboard!
+              </p>
+            </div>
+          )}
+
           <button
             style={{
               ...buttonStyle,
@@ -251,6 +295,7 @@ const AdminLogin: React.FC = () => {
               color: '#fff',
               cursor: selectedOrgId ? 'pointer' : 'not-allowed',
               opacity: selectedOrgId ? 1 : 0.6,
+              position: 'relative',
             }}
             disabled={!selectedOrgId}
             onClick={handleProceed}
@@ -298,9 +343,42 @@ const AdminLogin: React.FC = () => {
             e.currentTarget.style.backgroundColor = 'transparent';
             e.currentTarget.style.borderColor = '#374151';
           }}
-        >
+        >>
           ← Zurück zur Startseite
         </button>
+
+        {/* Schlafender Gremlin für zukünftige Hilfe-Funktion */}
+        <div
+          style={{
+            position: "fixed",
+            bottom: "2rem",
+            right: "2rem",
+            zIndex: 1000,
+            cursor: "pointer",
+            transition: "transform 0.2s ease",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = "scale(1.1)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "scale(1)";
+          }}
+          onClick={() => {
+            // Hier später Hilfefunktion implementieren
+            console.log("Gremlin wurde angeklickt - Hilfe kommt bald!");
+          }}
+          title="Hilfe (coming soon)"
+        >
+          <img
+            src={sleepGremlin}
+            alt="Hilfe Gremlin"
+            style={{
+              width: "120px",
+              height: "120px",
+              objectFit: "contain",
+            }}
+          />
+        </div>
       </main>
     </div>
   );

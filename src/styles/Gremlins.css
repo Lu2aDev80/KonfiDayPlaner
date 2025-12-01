@@ -1,0 +1,64 @@
+/* Gremlin Animation Styles */
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0) rotate(var(--rotation, 0deg));
+  }
+  50% {
+    transform: translateY(-10px) rotate(var(--rotation, 0deg));
+  }
+}
+
+@keyframes gremlinWiggle {
+  0%, 100% {
+    transform: rotate(var(--rotation, 0deg));
+  }
+  25% {
+    transform: rotate(calc(var(--rotation, 0deg) + 5deg));
+  }
+  75% {
+    transform: rotate(calc(var(--rotation, 0deg) - 5deg));
+  }
+}
+
+@keyframes gremlinFloat {
+  0%, 100% {
+    transform: translateY(0) rotate(var(--rotation, 0deg));
+  }
+  50% {
+    transform: translateY(-5px) rotate(var(--rotation, 0deg));
+  }
+}
+
+/* Gremlin container styles */
+.gremlinContainer {
+  display: inline-block;
+  animation: gremlinFloat 3s ease-in-out infinite;
+}
+
+.gremlinContainer.bounce {
+  animation: bounce 2s ease-in-out infinite;
+}
+
+.gremlinContainer.wiggle {
+  animation: gremlinWiggle 1.5s ease-in-out infinite;
+}
+
+/* Loading state with Gremlin */
+.loadingWithGremlin {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem;
+}
+
+.loadingWithGremlin .gremlin {
+  animation: bounce 1s ease-in-out infinite;
+}
+
+.loadingText {
+  font-family: '"Inter", "Roboto", Arial, sans-serif';
+  font-size: 1.1rem;
+  color: #4a5568;
+  font-weight: 500;
+}
