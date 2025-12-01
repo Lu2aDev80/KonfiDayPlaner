@@ -7,12 +7,8 @@ import {
   Users, 
   Clock, 
   Edit3, 
-  Eye,
-  Smartphone,
   ChevronRight,
   LogIn,
-  Plus,
-  Save,
   ArrowLeft
 } from 'lucide-react';
 import FlipchartBackground from '../components/layout/FlipchartBackground';

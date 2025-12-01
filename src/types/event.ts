@@ -1,4 +1,4 @@
-import { ScheduleItem } from './schedule';
+import type { ScheduleItem } from './schedule';
 
 export interface Event {
   id: string;
