@@ -15,8 +15,8 @@ FROM nginx:alpine
 # Copy built files to nginx
 COPY --from=builder /usr/src/app/dist /usr/share/nginx/html
 
-# Copy nginx configuration (optional)
-# COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copy nginx configuration
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
 
