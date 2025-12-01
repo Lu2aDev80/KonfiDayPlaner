@@ -17,35 +17,25 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
 
-    - name: Log in to Docker Hub
+    - name: Log in to GitHub Container Registry
       uses: docker/login-action@v2
       with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build and push Docker image
       uses: docker/build-push-action@v2
       with:
         context: .
         push: true
-        tags: luca3008/minihackerthon:latest
+        tags: |
+          ghcr.io/${{ github.repository_owner }}/konfidayplaner:latest
+          ghcr.io/${{ github.repository_owner }}/konfidayplaner:${{ github.sha }}
 
-    - name: Install sshpass
-      run: sudo apt-get update && sudo apt-get install -y sshpass
-
-    - name: Copy files and deploy to server
-      env:
-        SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+    - name: Deployment Info
       run: |
-        echo "Waiting before connecting..."
-        sleep 2
-        sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ServerAliveInterval=30 Administrator@lu2adevelopment.de "mkdir -p C:/docker/konfidayplaner" || true
-        sleep 1
-        echo "Copying docker-compose.yml..."
-        sshpass -p "$SSH_PASSWORD" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null docker-compose.yml Administrator@lu2adevelopment.de:C:/docker/konfidayplaner/docker-compose.yml
-        sleep 1
-        echo "Copying web.config..."
-        sshpass -p "$SSH_PASSWORD" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null web.config Administrator@lu2adevelopment.de:C:/inetpub/wwwroot/web.config
-        sleep 1
-        echo "Deploying container..."
-        sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ServerAliveInterval=30 Administrator@lu2adevelopment.de "cd C:/docker/konfidayplaner && docker-compose down && docker pull luca3008/minihackerthon:latest && docker-compose up -d && timeout /t 5 && curl -I http://localhost:8080/minihackathon/ || echo Container might still be starting..."
+        echo "✅ Image pushed to GitHub Container Registry"
+        echo "📦 Image: ghcr.io/${{ github.repository_owner }}/konfidayplaner:latest"
+        echo "🔄 Watchtower on the server will automatically update the container within 5 minutes"
+        echo "🌐 URL: http://lu2adevelopment.de/minihackathon/"
