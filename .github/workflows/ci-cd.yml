@@ -33,8 +33,14 @@ jobs:
     - name: Install sshpass
       run: sudo apt-get update && sudo apt-get install -y sshpass
 
+    - name: Copy docker-compose.yml to server
+      env:
+        SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+      run: |
+        sshpass -p "$SSH_PASSWORD" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null docker-compose.yml Administrator@lu2adevelopment.de:C:/docker/konfidayplaner/
+
     - name: Deploy to server
       env:
         SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
       run: |
-        sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null Administrator@lu2adevelopment.de "cd C:\\docker\\konfidayplaner && docker pull luca3008/minihackerthon:latest && docker-compose up -d"
+        sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null Administrator@lu2adevelopment.de "cd C:/docker/konfidayplaner && docker pull luca3008/minihackerthon:latest && docker-compose up -d"
