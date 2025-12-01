@@ -6,7 +6,6 @@ import { organisations } from '../data/organisations';
 import styles from './Admin.module.css';
 import chaosOpsLogo from '../assets/Chaos-Ops Logo.png';
 import loginGremlin from '../assets/gremlins/login.png';
-import successGremlin from '../assets/gremlins/erfolg.png';
 import sleepGremlin from '../assets/gremlins/sleep.png';
 
 const AdminLogin: React.FC = () => {
