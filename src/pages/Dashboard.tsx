@@ -14,9 +14,12 @@ import {
 import EventForm from "../components/forms/EventForm";
 import DayPlanForm from "../components/forms/DayPlanForm";
 import ScheduleManager from "../components/planner/ScheduleManager";
+import FlipchartBackground from "../components/layout/FlipchartBackground";
 import type { Event, DayPlan } from "../types/event";
 import type { ScheduleItem } from "../types/schedule";
 import { organisations } from "../data/organisations";
+import styles from './Admin.module.css';
+import chaosOpsLogo from '../assets/Chaos-Ops Logo.png';
 
 const Dashboard: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -272,521 +275,684 @@ const Dashboard: React.FC = () => {
   }
 
   // Main dashboard view
+  const cardStyle = {
+    background: '#fff',
+    borderRadius: '1.2rem 1.35rem 1.15rem 1.25rem',
+    boxShadow: '2px 4px 0 #e5e7eb, 0 2px 8px 0 rgba(0,0,0,0.08)',
+    padding: '2rem',
+    border: '2px solid #181818',
+    position: 'relative' as const,
+    transform: 'rotate(-0.2deg)',
+  };
+
+  const buttonStyle = {
+    padding: '0.75rem 1.5rem',
+    border: '2px solid #181818',
+    borderRadius: '8px',
+    fontSize: '0.95rem',
+    fontWeight: '700',
+    fontFamily: '"Inter", "Roboto", Arial, sans-serif',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    transition: 'all 0.2s ease',
+    boxShadow: '2px 4px 0 #181818',
+    textShadow: '0 1px 2px rgba(0,0,0,0.1)',
+  };
+
   return (
-    <div
-      style={{
-        width: "100%",
-        height: "100%",
-        padding: "1rem",
-        overflow: "auto",
-        boxSizing: "border-box",
-      }}
-    >
-      {/* Header */}
-      <div
-        style={{
-          marginBottom: "1.5rem",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: "1rem",
-        }}
-      >
-        <div>
-          <h1
-            style={{
-              fontFamily:
-                '"Gloria Hallelujah", "Caveat", "Comic Neue", cursive, sans-serif',
-              fontSize: "clamp(1.5rem, 4vw, 2rem)",
-              fontWeight: "700",
-              color: "#181818",
-              marginBottom: "0.5rem",
-              margin: 0,
-            }}
-          >
-            Admin Dashboard
-          </h1>
-          <p
-            style={{
-              fontFamily: '"Inter", "Roboto", Arial, sans-serif',
-              fontSize: "clamp(0.875rem, 2vw, 1rem)",
-              color: "#64748b",
-              margin: 0,
-            }}
-          >
-            {organisation?.name || "Organisation"}
-          </p>
-        </div>
-        <button
-          onClick={handleLogout}
-          style={{
-            padding: "0.75rem 1.25rem",
-            border: "2px solid #dc2626",
-            borderRadius: "8px",
-            fontSize: "0.95rem",
-            fontWeight: "600",
-            fontFamily: '"Inter", "Roboto", Arial, sans-serif',
-            backgroundColor: "#fff",
-            color: "#dc2626",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            gap: "0.5rem",
-            transition: "all 0.2s ease",
-          }}
-        >
-          <LogOut size={16} />
-          Abmelden
-        </button>
-      </div>
+    <div className={styles.adminWrapper} role="main" aria-label="Dashboard">
+      <FlipchartBackground />
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: selectedEvent
-            ? "repeat(auto-fit, minmax(min(100%, 350px), 1fr))"
-            : "1fr",
-          gap: "1.5rem",
-          alignItems: "start",
-        }}
-      >
-        {/* Events List */}
-        <div>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: "1rem",
-            }}
-          >
-            <h2
+      <main className={styles.adminContent} style={{
+        padding: '2rem 1rem',
+        maxWidth: '1400px',
+        margin: '0 auto',
+      }}>
+        {/* Header Card */}
+        <div style={{
+          ...cardStyle,
+          marginBottom: '2rem',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '1.5rem',
+        }}>
+          <div className={styles.tape} />
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+            <img
+              src={chaosOpsLogo}
+              alt="Chaos Ops Logo"
               style={{
-                fontFamily:
-                  '"Gloria Hallelujah", "Caveat", "Comic Neue", cursive, sans-serif',
-                fontSize: "clamp(1.25rem, 3vw, 1.5rem)",
-                fontWeight: "600",
-                color: "#181818",
-                display: "flex",
-                alignItems: "center",
-                gap: "0.5rem",
-                margin: 0,
+                maxWidth: '150px',
+                height: 'auto',
+                filter: 'drop-shadow(2px 4px 8px rgba(0,0,0,0.1))',
               }}
-            >
-              <Folder size={20} />
-              Veranstaltungen ({events.length})
-            </h2>
-            <button
-              onClick={() => setShowEventForm(true)}
-              style={{
-                padding: "0.625rem 1rem",
-                border: "2px solid #181818",
-                borderRadius: "8px",
-                fontSize: "0.9rem",
-                fontWeight: "700",
-                fontFamily: '"Inter", "Roboto", Arial, sans-serif',
-                backgroundColor: "#fbbf24",
-                color: "#fff",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                gap: "0.5rem",
-                transition: "all 0.2s ease",
-                boxShadow: "2px 4px 0 #181818",
-              }}
-            >
-              <Plus size={16} />
-              Neu
-            </button>
-          </div>
-
-          <div
-            style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}
-          >
-            {events.length === 0 ? (
-              <div
+            />
+            <div>
+              <h1
                 style={{
-                  padding: "2rem",
-                  textAlign: "center",
-                  border: "2px dashed #d1d5db",
-                  borderRadius: "8px",
-                  color: "#9ca3af",
-                  fontFamily: '"Inter", "Roboto", Arial, sans-serif',
+                  fontFamily: '"Gloria Hallelujah", "Caveat", "Comic Neue", cursive, sans-serif',
+                  fontSize: 'clamp(1.5rem, 4vw, 2rem)',
+                  fontWeight: '700',
+                  color: '#0f172a',
+                  margin: 0,
+                  marginBottom: '0.25rem',
+                  textShadow: '2px 2px 0 #fff, 0 3px 6px rgba(251, 191, 36, 0.8)',
                 }}
               >
-                Noch keine Veranstaltungen. Klicke auf "Neu" um zu starten!
-              </div>
-            ) : (
-              events.map((event) => (
-                <div
-                  key={event.id}
-                  onClick={() => setSelectedEvent(event)}
-                  style={{
-                    padding: "1rem",
-                    border: `2px solid ${
-                      selectedEvent?.id === event.id ? "#fbbf24" : "#e5e7eb"
-                    }`,
-                    borderRadius: "8px",
-                    backgroundColor:
-                      selectedEvent?.id === event.id ? "#fef3c7" : "#fff",
-                    cursor: "pointer",
-                    transition: "all 0.2s ease",
-                    boxShadow:
-                      selectedEvent?.id === event.id
-                        ? "2px 4px 0 #fbbf24"
-                        : "none",
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "start",
-                      marginBottom: "0.5rem",
-                    }}
-                  >
-                    <div style={{ flex: 1 }}>
-                      <h3
-                        style={{
-                          fontFamily:
-                            '"Gloria Hallelujah", "Caveat", "Comic Neue", cursive, sans-serif',
-                          fontSize: "clamp(1rem, 2.5vw, 1.1rem)",
-                          fontWeight: "600",
-                          color: "#181818",
-                          marginBottom: "0.25rem",
-                          margin: 0,
-                        }}
-                      >
-                        {event.name}
-                      </h3>
-                      {event.description && (
-                        <p
-                          style={{
-                            fontFamily: '"Inter", "Roboto", Arial, sans-serif',
-                            fontSize: "0.85rem",
-                            color: "#64748b",
-                            marginBottom: "0.5rem",
-                          }}
-                        >
-                          {event.description}
-                        </p>
-                      )}
-                      <div
-                        style={{
-                          fontFamily: '"Inter", "Roboto", Arial, sans-serif',
-                          fontSize: "0.8rem",
-                          color: "#9ca3af",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "0.5rem",
-                        }}
-                      >
-                        <FileText size={12} />
-                        {event.dayPlans.length} Tagesplan
-                        {event.dayPlans.length !== 1 ? "e" : ""}
-                      </div>
-                    </div>
-                    <div style={{ display: "flex", gap: "0.5rem" }}>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setEditingEvent(event);
-                          setShowEventForm(true);
-                        }}
-                        style={{
-                          padding: "0.4rem",
-                          border: "none",
-                          borderRadius: "4px",
-                          backgroundColor: "#e0f2fe",
-                          color: "#0284c7",
-                          cursor: "pointer",
-                        }}
-                        title="Bearbeiten"
-                      >
-                        <Edit size={14} />
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteEvent(event.id);
-                        }}
-                        style={{
-                          padding: "0.4rem",
-                          border: "none",
-                          borderRadius: "4px",
-                          backgroundColor: "#fee2e2",
-                          color: "#dc2626",
-                          cursor: "pointer",
-                        }}
-                        title="Löschen"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
+                Admin Dashboard
+              </h1>
+              <p
+                style={{
+                  fontFamily: '"Inter", "Roboto", Arial, sans-serif',
+                  fontSize: 'clamp(0.875rem, 2vw, 1rem)',
+                  color: '#334155',
+                  margin: 0,
+                  fontWeight: '500',
+                }}
+              >
+                {organisation?.name || "Organisation"}
+              </p>
+            </div>
           </div>
+
+          <button
+            onClick={handleLogout}
+            style={{
+              ...buttonStyle,
+              backgroundColor: '#fff',
+              color: '#dc2626',
+              border: '2px solid #dc2626',
+              boxShadow: '2px 4px 0 #dc2626',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '3px 6px 0 #dc2626';
+              e.currentTarget.style.backgroundColor = '#fee2e2';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '2px 4px 0 #dc2626';
+              e.currentTarget.style.backgroundColor = '#fff';
+            }}
+          >
+            <LogOut size={18} />
+            Abmelden
+          </button>
         </div>
 
-        {/* Day Plans List - Only shown when event is selected */}
-        {selectedEvent && (
-          <div>
+        {/* Content Grid */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: selectedEvent
+              ? "repeat(auto-fit, minmax(min(100%, 450px), 1fr))"
+              : "1fr",
+            gap: "2rem",
+            alignItems: "start",
+          }}
+        >
+          {/* Events List */}
+          <div style={cardStyle}>
+            <div style={{
+              position: 'absolute',
+              top: '-12px',
+              left: '30%',
+              width: '45px',
+              height: '16px',
+              background: 'repeating-linear-gradient(135deg, #fffbe7 0 6px, #fbbf24 6px 12px)',
+              borderRadius: '6px',
+              border: '1.5px solid #f59e0b',
+              boxShadow: '0 1px 4px rgba(245,158,11,0.3)',
+              transform: 'translateX(-50%) rotate(-2deg)',
+              zIndex: 2,
+            }} />
+
             <div
               style={{
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
-                marginBottom: "1rem",
+                marginBottom: "1.5rem",
               }}
             >
               <h2
                 style={{
-                  fontFamily:
-                    '"Gloria Hallelujah", "Caveat", "Comic Neue", cursive, sans-serif',
+                  fontFamily: '"Gloria Hallelujah", "Caveat", "Comic Neue", cursive, sans-serif',
                   fontSize: "clamp(1.25rem, 3vw, 1.5rem)",
-                  fontWeight: "600",
-                  color: "#181818",
+                  fontWeight: "700",
+                  color: "#0f172a",
                   display: "flex",
                   alignItems: "center",
                   gap: "0.5rem",
                   margin: 0,
                 }}
               >
-                <Calendar size={20} />
-                Tagespläne ({selectedEvent.dayPlans.length})
+                <Folder size={24} strokeWidth={2.5} />
+                Veranstaltungen ({events.length})
               </h2>
               <button
-                onClick={() => setShowDayPlanForm(true)}
+                onClick={() => setShowEventForm(true)}
                 style={{
-                  padding: "0.625rem 1rem",
-                  border: "2px solid #181818",
-                  borderRadius: "8px",
+                  ...buttonStyle,
+                  backgroundColor: "#fbbf24",
+                  color: "#fff",
+                  padding: "0.625rem 1.25rem",
                   fontSize: "0.9rem",
-                  fontWeight: "700",
-                  fontFamily: '"Inter", "Roboto", Arial, sans-serif',
-                  backgroundColor: "#d9fdd2",
-                  color: "#181818",
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.5rem",
-                  transition: "all 0.2s ease",
-                  boxShadow: "2px 4px 0 #181818",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '3px 6px 0 #181818';
+                  e.currentTarget.style.backgroundColor = '#f59e0b';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '2px 4px 0 #181818';
+                  e.currentTarget.style.backgroundColor = '#fbbf24';
                 }}
               >
-                <Plus size={16} />
+                <Plus size={18} strokeWidth={2.5} />
                 Neu
               </button>
             </div>
 
             <div
-              style={{
-                padding: "1rem",
-                backgroundColor: "#fef3c7",
-                border: "2px solid #fbbf24",
-                borderRadius: "8px",
-                marginBottom: "1rem",
-              }}
+              style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
             >
-              <div
-                style={{
-                  fontFamily:
-                    '"Gloria Hallelujah", "Caveat", "Comic Neue", cursive, sans-serif',
-                  fontSize: "1rem",
-                  fontWeight: "600",
-                  color: "#181818",
-                  marginBottom: "0.25rem",
-                }}
-              >
-                {selectedEvent.name}
-              </div>
-              <div
-                style={{
-                  fontFamily: '"Inter", "Roboto", Arial, sans-serif',
-                  fontSize: "0.85rem",
-                  color: "#64748b",
-                }}
-              >
-                Ausgewählte Veranstaltung
-              </div>
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "0.75rem",
-              }}
-            >
-              {selectedEvent.dayPlans.length === 0 ? (
+              {events.length === 0 ? (
                 <div
                   style={{
-                    padding: "2rem",
+                    padding: "2.5rem",
                     textAlign: "center",
-                    border: "2px dashed #d1d5db",
-                    borderRadius: "8px",
-                    color: "#9ca3af",
+                    border: "2px dashed #cbd5e1",
+                    borderRadius: "12px",
+                    color: "#64748b",
                     fontFamily: '"Inter", "Roboto", Arial, sans-serif',
+                    fontSize: '1rem',
+                    fontWeight: '500',
+                    backgroundColor: '#f8fafc',
                   }}
                 >
-                  Noch keine Tagespläne. Klicke auf "Neu" um einen zu erstellen!
+                  Noch keine Veranstaltungen. Klicke auf "Neu" um zu starten!
                 </div>
               ) : (
-                selectedEvent.dayPlans
-                  .sort(
-                    (a, b) =>
-                      new Date(a.date).getTime() - new Date(b.date).getTime()
-                  )
-                  .map((dayPlan) => (
+                events.map((event) => (
+                  <div
+                    key={event.id}
+                    onClick={() => setSelectedEvent(event)}
+                    style={{
+                      padding: "1.25rem",
+                      border: `2px solid ${
+                        selectedEvent?.id === event.id ? "#181818" : "#cbd5e1"
+                      }`,
+                      borderRadius: "12px",
+                      backgroundColor:
+                        selectedEvent?.id === event.id ? "#fef3c7" : "#f8fafc",
+                      cursor: "pointer",
+                      transition: "all 0.2s ease",
+                      boxShadow:
+                        selectedEvent?.id === event.id
+                          ? "2px 4px 0 #181818"
+                          : "0 1px 3px rgba(0,0,0,0.1)",
+                    }}
+                    onMouseEnter={(e) => {
+                      if (selectedEvent?.id !== event.id) {
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                        e.currentTarget.style.boxShadow = '2px 4px 0 #cbd5e1';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (selectedEvent?.id !== event.id) {
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+                      }
+                    }}
+                  >
                     <div
-                      key={dayPlan.id}
                       style={{
-                        padding: "1rem",
-                        border: "2px solid #e5e7eb",
-                        borderRadius: "8px",
-                        backgroundColor: "#fff",
-                        transition: "all 0.2s ease",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "start",
+                        gap: '1rem',
                       }}
                     >
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "start",
-                        }}
-                      >
-                        <div style={{ flex: 1 }}>
-                          <h3
-                            style={{
-                              fontFamily:
-                                '"Gloria Hallelujah", "Caveat", "Comic Neue", cursive, sans-serif',
-                              fontSize: "clamp(1rem, 2.5vw, 1.1rem)",
-                              fontWeight: "600",
-                              color: "#181818",
-                              marginBottom: "0.25rem",
-                              margin: 0,
-                            }}
-                          >
-                            {dayPlan.name}
-                          </h3>
-                          <p
-                            style={{
-                              fontFamily:
-                                '"Inter", "Roboto", Arial, sans-serif',
-                              fontSize: "0.85rem",
-                              color: "#64748b",
-                              marginBottom: "0.5rem",
-                            }}
-                          >
-                            {new Date(dayPlan.date).toLocaleDateString(
-                              "de-DE",
-                              {
-                                weekday: "long",
-                                year: "numeric",
-                                month: "long",
-                                day: "numeric",
-                              }
-                            )}
-                          </p>
-                          <div
-                            style={{
-                              fontFamily:
-                                '"Inter", "Roboto", Arial, sans-serif',
-                              fontSize: "0.8rem",
-                              color: "#9ca3af",
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "0.5rem",
-                            }}
-                          >
-                            <Calendar size={12} />
-                            {dayPlan.schedule.length} Termin
-                            {dayPlan.schedule.length !== 1 ? "e" : ""}
-                          </div>
-                        </div>
-                        <div
+                      <div style={{ flex: 1 }}>
+                        <h3
                           style={{
-                            display: "flex",
-                            gap: "0.5rem",
-                            flexWrap: "wrap",
+                            fontFamily: '"Gloria Hallelujah", "Caveat", "Comic Neue", cursive, sans-serif',
+                            fontSize: "clamp(1.1rem, 2.5vw, 1.25rem)",
+                            fontWeight: "700",
+                            color: "#0f172a",
+                            marginBottom: "0.5rem",
+                            margin: 0,
                           }}
                         >
-                          <button
-                            onClick={() => setManagingSchedule(dayPlan)}
+                          {event.name}
+                        </h3>
+                        {event.description && (
+                          <p
                             style={{
-                              padding: "0.4rem",
-                              border: "none",
-                              borderRadius: "4px",
-                              backgroundColor: "#fef3c7",
-                              color: "#f59e0b",
-                              cursor: "pointer",
+                              fontFamily: '"Inter", "Roboto", Arial, sans-serif',
+                              fontSize: "0.9rem",
+                              color: "#475569",
+                              marginBottom: "0.75rem",
+                              fontWeight: '500',
                             }}
-                            title="Termine verwalten"
                           >
-                            <Clock size={14} />
-                          </button>
-                          <button
-                            onClick={() => {
-                              // Navigate to planner view with the day plan
-                              navigate(
-                                `/planner?dayPlanId=${dayPlan.id}&org=${orgId}`
-                              );
-                            }}
-                            style={{
-                              padding: "0.4rem",
-                              border: "none",
-                              borderRadius: "4px",
-                              backgroundColor: "#f0fdf4",
-                              color: "#16a34a",
-                              cursor: "pointer",
-                            }}
-                            title="Vorschau"
-                          >
-                            <Eye size={14} />
-                          </button>
-                          <button
-                            onClick={() => {
-                              setEditingDayPlan(dayPlan);
-                              setShowDayPlanForm(true);
-                            }}
-                            style={{
-                              padding: "0.4rem",
-                              border: "none",
-                              borderRadius: "4px",
-                              backgroundColor: "#e0f2fe",
-                              color: "#0284c7",
-                              cursor: "pointer",
-                            }}
-                            title="Bearbeiten"
-                          >
-                            <Edit size={14} />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteDayPlan(dayPlan.id)}
-                            style={{
-                              padding: "0.4rem",
-                              border: "none",
-                              borderRadius: "4px",
-                              backgroundColor: "#fee2e2",
-                              color: "#dc2626",
-                              cursor: "pointer",
-                            }}
-                            title="Löschen"
-                          >
-                            <Trash2 size={14} />
-                          </button>
+                            {event.description}
+                          </p>
+                        )}
+                        <div
+                          style={{
+                            fontFamily: '"Inter", "Roboto", Arial, sans-serif',
+                            fontSize: "0.85rem",
+                            color: "#64748b",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "0.5rem",
+                            fontWeight: '600',
+                          }}
+                        >
+                          <FileText size={14} strokeWidth={2} />
+                          {event.dayPlans.length} Tagesplan
+                          {event.dayPlans.length !== 1 ? "e" : ""}
                         </div>
                       </div>
+                      <div style={{ display: "flex", gap: "0.5rem", flexShrink: 0 }}>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingEvent(event);
+                            setShowEventForm(true);
+                          }}
+                          style={{
+                            padding: "0.5rem",
+                            border: "2px solid #0ea5e9",
+                            borderRadius: "6px",
+                            backgroundColor: "#f0f9ff",
+                            color: "#0284c7",
+                            cursor: "pointer",
+                            transition: 'all 0.2s ease',
+                            boxShadow: '1px 2px 0 #0ea5e9',
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = "#e0f2fe";
+                            e.currentTarget.style.transform = 'translateY(-1px)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = "#f0f9ff";
+                            e.currentTarget.style.transform = 'translateY(0)';
+                          }}
+                          title="Bearbeiten"
+                        >
+                          <Edit size={16} strokeWidth={2} />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteEvent(event.id);
+                          }}
+                          style={{
+                            padding: "0.5rem",
+                            border: "2px solid #ef4444",
+                            borderRadius: "6px",
+                            backgroundColor: "#fef2f2",
+                            color: "#dc2626",
+                            cursor: "pointer",
+                            transition: 'all 0.2s ease',
+                            boxShadow: '1px 2px 0 #ef4444',
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = "#fee2e2";
+                            e.currentTarget.style.transform = 'translateY(-1px)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = "#fef2f2";
+                            e.currentTarget.style.transform = 'translateY(0)';
+                          }}
+                          title="Löschen"
+                        >
+                          <Trash2 size={16} strokeWidth={2} />
+                        </button>
+                      </div>
                     </div>
-                  ))
+                  </div>
+                ))
               )}
             </div>
           </div>
-        )}
-      </div>
+
+          {/* Day Plans List - Only shown when event is selected */}
+          {selectedEvent && (
+            <div style={{
+              ...cardStyle,
+              transform: 'rotate(0.2deg)',
+            }}>
+              <div style={{
+                position: 'absolute',
+                top: '-12px',
+                right: '30%',
+                width: '45px',
+                height: '16px',
+                background: 'repeating-linear-gradient(135deg, #fffbe7 0 6px, #10b981 6px 12px)',
+                borderRadius: '6px',
+                border: '1.5px solid #059669',
+                boxShadow: '0 1px 4px rgba(5,150,105,0.3)',
+                transform: 'translateX(50%) rotate(3deg)',
+                zIndex: 2,
+              }} />
+
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginBottom: "1.5rem",
+                }}
+              >
+                <h2
+                  style={{
+                    fontFamily: '"Gloria Hallelujah", "Caveat", "Comic Neue", cursive, sans-serif',
+                    fontSize: "clamp(1.25rem, 3vw, 1.5rem)",
+                    fontWeight: "700",
+                    color: "#0f172a",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    margin: 0,
+                  }}
+                >
+                  <Calendar size={24} strokeWidth={2.5} />
+                  Tagespläne ({selectedEvent.dayPlans.length})
+                </h2>
+                <button
+                  onClick={() => setShowDayPlanForm(true)}
+                  style={{
+                    ...buttonStyle,
+                    backgroundColor: "#10b981",
+                    color: "#fff",
+                    padding: "0.625rem 1.25rem",
+                    fontSize: "0.9rem",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = '3px 6px 0 #181818';
+                    e.currentTarget.style.backgroundColor = '#059669';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '2px 4px 0 #181818';
+                    e.currentTarget.style.backgroundColor = '#10b981';
+                  }}
+                >
+                  <Plus size={18} strokeWidth={2.5} />
+                  Neu
+                </button>
+              </div>
+
+              <div
+                style={{
+                  padding: "1rem 1.25rem",
+                  backgroundColor: "#fef3c7",
+                  border: "2px solid #f59e0b",
+                  borderRadius: "10px",
+                  marginBottom: "1.5rem",
+                  boxShadow: '1px 2px 0 #f59e0b',
+                }}
+              >
+                <div
+                  style={{
+                    fontFamily: '"Gloria Hallelujah", "Caveat", "Comic Neue", cursive, sans-serif',
+                    fontSize: "1.1rem",
+                    fontWeight: "700",
+                    color: "#0f172a",
+                    marginBottom: "0.25rem",
+                  }}
+                >
+                  {selectedEvent.name}
+                </div>
+                <div
+                  style={{
+                    fontFamily: '"Inter", "Roboto", Arial, sans-serif',
+                    fontSize: "0.85rem",
+                    color: "#78350f",
+                    fontWeight: '600',
+                  }}
+                >
+                  Ausgewählte Veranstaltung
+                </div>
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "1rem",
+                }}
+              >
+                {selectedEvent.dayPlans.length === 0 ? (
+                  <div
+                    style={{
+                      padding: "2.5rem",
+                      textAlign: "center",
+                      border: "2px dashed #cbd5e1",
+                      borderRadius: "12px",
+                      color: "#64748b",
+                      fontFamily: '"Inter", "Roboto", Arial, sans-serif',
+                      fontSize: '1rem',
+                      fontWeight: '500',
+                      backgroundColor: '#f8fafc',
+                    }}
+                  >
+                    Noch keine Tagespläne. Klicke auf "Neu" um einen zu erstellen!
+                  </div>
+                ) : (
+                  selectedEvent.dayPlans
+                    .sort(
+                      (a, b) =>
+                        new Date(a.date).getTime() - new Date(b.date).getTime()
+                    )
+                    .map((dayPlan) => (
+                      <div
+                        key={dayPlan.id}
+                        style={{
+                          padding: "1.25rem",
+                          border: "2px solid #cbd5e1",
+                          borderRadius: "12px",
+                          backgroundColor: "#f8fafc",
+                          transition: "all 0.2s ease",
+                          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.transform = 'translateY(-2px)';
+                          e.currentTarget.style.boxShadow = '2px 4px 0 #cbd5e1';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "start",
+                            gap: '1rem',
+                          }}
+                        >
+                          <div style={{ flex: 1 }}>
+                            <h3
+                              style={{
+                                fontFamily: '"Gloria Hallelujah", "Caveat", "Comic Neue", cursive, sans-serif',
+                                fontSize: "clamp(1.1rem, 2.5vw, 1.25rem)",
+                                fontWeight: "700",
+                                color: "#0f172a",
+                                marginBottom: "0.5rem",
+                                margin: 0,
+                              }}
+                            >
+                              {dayPlan.name}
+                            </h3>
+                            <p
+                              style={{
+                                fontFamily: '"Inter", "Roboto", Arial, sans-serif',
+                                fontSize: "0.9rem",
+                                color: "#475569",
+                                marginBottom: "0.75rem",
+                                fontWeight: '500',
+                              }}
+                            >
+                              {new Date(dayPlan.date).toLocaleDateString(
+                                "de-DE",
+                                {
+                                  weekday: "long",
+                                  year: "numeric",
+                                  month: "long",
+                                  day: "numeric",
+                                }
+                              )}
+                            </p>
+                            <div
+                              style={{
+                                fontFamily: '"Inter", "Roboto", Arial, sans-serif',
+                                fontSize: "0.85rem",
+                                color: "#64748b",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "0.5rem",
+                                fontWeight: '600',
+                              }}
+                            >
+                              <Calendar size={14} strokeWidth={2} />
+                              {dayPlan.schedule.length} Termin
+                              {dayPlan.schedule.length !== 1 ? "e" : ""}
+                            </div>
+                          </div>
+                          <div
+                            style={{
+                              display: "flex",
+                              gap: "0.5rem",
+                              flexWrap: "wrap",
+                              flexShrink: 0,
+                            }}
+                          >
+                            <button
+                              onClick={() => setManagingSchedule(dayPlan)}
+                              style={{
+                                padding: "0.5rem",
+                                border: "2px solid #f59e0b",
+                                borderRadius: "6px",
+                                backgroundColor: "#fffbeb",
+                                color: "#f59e0b",
+                                cursor: "pointer",
+                                transition: 'all 0.2s ease',
+                                boxShadow: '1px 2px 0 #f59e0b',
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = "#fef3c7";
+                                e.currentTarget.style.transform = 'translateY(-1px)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = "#fffbeb";
+                                e.currentTarget.style.transform = 'translateY(0)';
+                              }}
+                              title="Termine verwalten"
+                            >
+                              <Clock size={16} strokeWidth={2} />
+                            </button>
+                            <button
+                              onClick={() => {
+                                navigate(
+                                  `/planner?dayPlanId=${dayPlan.id}&org=${orgId}`
+                                );
+                              }}
+                              style={{
+                                padding: "0.5rem",
+                                border: "2px solid #10b981",
+                                borderRadius: "6px",
+                                backgroundColor: "#f0fdf4",
+                                color: "#10b981",
+                                cursor: "pointer",
+                                transition: 'all 0.2s ease',
+                                boxShadow: '1px 2px 0 #10b981',
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = "#d1fae5";
+                                e.currentTarget.style.transform = 'translateY(-1px)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = "#f0fdf4";
+                                e.currentTarget.style.transform = 'translateY(0)';
+                              }}
+                              title="Vorschau"
+                            >
+                              <Eye size={16} strokeWidth={2} />
+                            </button>
+                            <button
+                              onClick={() => {
+                                setEditingDayPlan(dayPlan);
+                                setShowDayPlanForm(true);
+                              }}
+                              style={{
+                                padding: "0.5rem",
+                                border: "2px solid #0ea5e9",
+                                borderRadius: "6px",
+                                backgroundColor: "#f0f9ff",
+                                color: "#0284c7",
+                                cursor: "pointer",
+                                transition: 'all 0.2s ease',
+                                boxShadow: '1px 2px 0 #0ea5e9',
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = "#e0f2fe";
+                                e.currentTarget.style.transform = 'translateY(-1px)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = "#f0f9ff";
+                                e.currentTarget.style.transform = 'translateY(0)';
+                              }}
+                              title="Bearbeiten"
+                            >
+                              <Edit size={16} strokeWidth={2} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteDayPlan(dayPlan.id)}
+                              style={{
+                                padding: "0.5rem",
+                                border: "2px solid #ef4444",
+                                borderRadius: "6px",
+                                backgroundColor: "#fef2f2",
+                                color: "#dc2626",
+                                cursor: "pointer",
+                                transition: 'all 0.2s ease',
+                                boxShadow: '1px 2px 0 #ef4444',
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = "#fee2e2";
+                                e.currentTarget.style.transform = 'translateY(-1px)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = "#fef2f2";
+                                e.currentTarget.style.transform = 'translateY(0)';
+                              }}
+                              title="Löschen"
+                            >
+                              <Trash2 size={16} strokeWidth={2} />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </main>
     </div>
   );
 };

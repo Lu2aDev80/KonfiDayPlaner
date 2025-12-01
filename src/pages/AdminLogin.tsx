@@ -12,12 +12,14 @@ import sleepGremlin from '../assets/gremlins/sleep.png';
 const AdminLogin: React.FC = () => {
   const navigate = useNavigate();
   const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
+  const [showLoginForm, setShowLoginForm] = useState(false);
+  const [credentials, setCredentials] = useState({ username: '', password: '' });
 
   const handleOrganisationSelect = (orgId: string) => {
     setSelectedOrgId(orgId);
   };
 
-  const handleProceed = () => {
+  const handleProceedToLogin = () => {
     if (selectedOrgId) {
       // Store selected organisation
       localStorage.setItem('selectedOrganisation', selectedOrgId);
@@ -25,9 +27,18 @@ const AdminLogin: React.FC = () => {
       if (selectedOrg) {
         localStorage.setItem('selectedOrganisationName', selectedOrg.name);
       }
-      
-      // Navigate to dashboard
-      navigate('/admin/dashboard', { replace: true });
+      setShowLoginForm(true);
+    }
+  };
+
+  const handleLogin = (e: React.FormEvent | React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('Login wird ausgeführt - Navigation zum Dashboard');
+    
+    // Navigiere zum Dashboard mit der ausgewählten Organisation
+    if (selectedOrgId) {
+      navigate(`/admin/dashboard?org=${selectedOrgId}`, { replace: true });
     }
   };
 
@@ -135,35 +146,54 @@ const AdminLogin: React.FC = () => {
             }}>
               Admin Bereich
             </h1>
-            <img
-              src={loginGremlin}
-              alt="Login Gremlin"
-              style={{
-                width: '80px',
-                height: '80px',
-                objectFit: 'contain',
-                margin: '1rem 0',
-              }}
-            />
-            <p style={{
-              fontFamily: '"Inter", "Roboto", Arial, sans-serif',
-              fontSize: '1.1rem',
-              color: '#334155',
-              lineHeight: '1.6',
-              margin: 0,
-              fontWeight: '500',
-            }}>
-              Wähle deine Organisation aus, um fortzufahren
-            </p>
+            
+            {!showLoginForm && (
+              <>
+                <img
+                  src={loginGremlin}
+                  alt="Login Gremlin"
+                  style={{
+                    width: '80px',
+                    height: '80px',
+                    objectFit: 'contain',
+                    margin: '1rem 0',
+                  }}
+                />
+                <p style={{
+                  fontFamily: '"Inter", "Roboto", Arial, sans-serif',
+                  fontSize: '1.1rem',
+                  color: '#334155',
+                  lineHeight: '1.6',
+                  margin: 0,
+                  fontWeight: '500',
+                }}>
+                  Wähle deine Organisation aus, um fortzufahren
+                </p>
+              </>
+            )}
+            
+            {showLoginForm && selectedOrgId && (
+              <p style={{
+                fontFamily: '"Inter", "Roboto", Arial, sans-serif',
+                fontSize: '1.1rem',
+                color: '#334155',
+                lineHeight: '1.6',
+                margin: '1rem 0 0 0',
+                fontWeight: '500',
+              }}>
+                Melde dich bei {organisations.find(org => org.id === selectedOrgId)?.name} an
+              </p>
+            )}
           </div>
         </div>
 
-        {/* Organisation Selection */}
-        <div style={{
-          ...cardStyle,
-          transform: 'rotate(0.3deg)',
-          maxWidth: '700px',
-        }}>
+        {!showLoginForm ? (
+          /* Organisation Selection */
+          <div style={{
+            ...cardStyle,
+            transform: 'rotate(0.3deg)',
+            maxWidth: '700px',
+          }}>
           <div style={{
             position: 'absolute',
             top: '-12px',
@@ -257,37 +287,6 @@ const AdminLogin: React.FC = () => {
             ))}
           </div>
 
-          {selectedOrgId && (
-            <div style={{
-              textAlign: 'center',
-              padding: '1rem',
-              backgroundColor: '#f0fdf4',
-              borderRadius: '8px',
-              border: '2px solid #22c55e',
-              marginBottom: '1.5rem',
-            }}>
-              <img
-                src={successGremlin}
-                alt="Bereit!"
-                style={{
-                  width: '64px',
-                  height: '64px',
-                  objectFit: 'contain',
-                  marginBottom: '0.5rem',
-                }}
-              />
-              <p style={{
-                fontFamily: '"Inter", "Roboto", Arial, sans-serif',
-                fontSize: '1rem',
-                color: '#166534',
-                fontWeight: '600',
-                margin: 0,
-              }}>
-                Bereit für das Dashboard!
-              </p>
-            </div>
-          )}
-
           <button
             style={{
               ...buttonStyle,
@@ -295,10 +294,9 @@ const AdminLogin: React.FC = () => {
               color: '#fff',
               cursor: selectedOrgId ? 'pointer' : 'not-allowed',
               opacity: selectedOrgId ? 1 : 0.6,
-              position: 'relative',
             }}
             disabled={!selectedOrgId}
-            onClick={handleProceed}
+            onClick={handleProceedToLogin}
             onMouseEnter={(e) => {
               if (selectedOrgId) {
                 e.currentTarget.style.transform = 'translateY(-2px)';
@@ -313,10 +311,128 @@ const AdminLogin: React.FC = () => {
             }}
           >
             <LogIn size={20} />
-            Zum Dashboard
+            Weiter zum Login
             <ArrowRight size={20} />
           </button>
         </div>
+        ) : (
+          /* Login Form */
+          <div style={{
+            ...cardStyle,
+            transform: 'rotate(-0.2deg)',
+            maxWidth: '500px',
+          }}>
+            <div style={{
+              position: 'absolute',
+              top: '-12px',
+              left: '70%',
+              width: '45px',
+              height: '16px',
+              background: 'repeating-linear-gradient(135deg, #fffbe7 0 6px, #10b981 6px 12px)',
+              borderRadius: '6px',
+              border: '1.5px solid #059669',
+              boxShadow: '0 1px 4px rgba(5,150,105,0.3)',
+              transform: 'translateX(-50%) rotate(3deg)',
+              zIndex: 2,
+            }} />
+
+            <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              <div>
+                <label style={{
+                  display: 'block',
+                  fontFamily: '"Inter", "Roboto", Arial, sans-serif',
+                  fontSize: '1rem',
+                  fontWeight: '600',
+                  color: '#0f172a',
+                  marginBottom: '0.5rem',
+                }}>
+                  Benutzername
+                </label>
+                <input
+                  type="text"
+                  value={credentials.username}
+                  onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: '2px solid #374151',
+                    borderRadius: '8px',
+                    fontSize: '1rem',
+                    fontFamily: '"Inter", "Roboto", Arial, sans-serif',
+                    boxSizing: 'border-box',
+                  }}
+                  placeholder="Dein Benutzername"
+                />
+              </div>
+
+              <div>
+                <label style={{
+                  display: 'block',
+                  fontFamily: '"Inter", "Roboto", Arial, sans-serif',
+                  fontSize: '1rem',
+                  fontWeight: '600',
+                  color: '#0f172a',
+                  marginBottom: '0.5rem',
+                }}>
+                  Passwort
+                </label>
+                <input
+                  type="password"
+                  value={credentials.password}
+                  onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    border: '2px solid #374151',
+                    borderRadius: '8px',
+                    fontSize: '1rem',
+                    fontFamily: '"Inter", "Roboto", Arial, sans-serif',
+                    boxSizing: 'border-box',
+                  }}
+                  placeholder="Dein Passwort"
+                />
+              </div>
+
+              <button
+                type="submit"
+                style={{
+                  ...buttonStyle,
+                  backgroundColor: '#10b981',
+                  color: '#fff',
+                  marginTop: '0.5rem',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '3px 6px 0 #181818';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '2px 4px 0 #181818';
+                }}
+              >
+                <LogIn size={20} />
+                Anmelden
+              </button>
+            </form>
+
+            <button
+              onClick={() => setShowLoginForm(false)}
+              style={{
+                padding: '0.5rem 1rem',
+                border: 'none',
+                background: 'none',
+                color: '#6b7280',
+                cursor: 'pointer',
+                fontSize: '0.9rem',
+                marginTop: '1rem',
+                textAlign: 'center',
+                width: '100%',
+              }}
+            >
+              ← Zurück zur Organisationsauswahl
+            </button>
+          </div>
+        )}
 
         {/* Back to Home */}
         <button
