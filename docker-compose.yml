@@ -2,13 +2,10 @@ version: '3.8'
 
 services:
   app:
-    build: .
+    image: luca3008/minihackerthon:latest
     ports:
-      - '3000:3000'
-    environment:
-      - NODE_ENV=development
-    volumes:
-      - .:/usr/src/app
+      - '80:80'
+    restart: unless-stopped
     networks:
       - app-network
 
