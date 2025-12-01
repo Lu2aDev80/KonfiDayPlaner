@@ -6,11 +6,13 @@ import PlannerPage from "./pages/PlannerPage";
 import Admin from "./pages/Admin";
 import OrganisationSelect from "./pages/OrganisationSelect";
 import Dashboard from "./pages/Dashboard";
+import Documentation from "./pages/Documentation";
 
 function App() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
+      <Route path="/documentation" element={<Documentation />} />
       <Route path="/login" element={<Admin />}>
         <Route index element={<OrganisationSelect />} />
         <Route path="select" element={<OrganisationSelect />} />
