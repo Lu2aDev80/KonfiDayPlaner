@@ -5,3 +5,4 @@ export { default as DisplayRegister } from './DisplayRegister';
 export { default as Documentation } from './Documentation';
 export { default as Home } from './Home';
 export { default as PlannerPage } from './PlannerPage';
+export { default as VerifyEmail } from "./VerifyEmail";

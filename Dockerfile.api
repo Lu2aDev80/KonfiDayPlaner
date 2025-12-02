@@ -3,18 +3,17 @@ FROM node:22-alpine
 
 WORKDIR /usr/src/app
 
-# Copy package manifests
+# Copy package manifests and prisma schema first (needed for postinstall)
 COPY package*.json ./
-
-# Copy prisma and server code early for caching
 COPY prisma ./prisma
-COPY server ./server
-COPY src/services ./src/services
 
 # Install all deps (need devDeps for tsx runtime and prisma)
 RUN npm ci
 
-# Generate Prisma client
+# Copy server code after deps install
+COPY server ./server
+
+# Generate Prisma client (in case npm ci didn't run it)
 RUN npm run db:generate
 
 # Default env (can be overridden)
@@ -22,4 +21,4 @@ ENV NODE_ENV=production
 EXPOSE 3000
 
 # Start script that applies migrations then runs the server
-CMD sh -c "npm run db:migrate && node node_modules/tsx/dist/cli.js server/index.ts"
+CMD sh -c "npm run db:migrate && npx tsx server/index.ts"

@@ -8,6 +8,7 @@ import AdminLogin from "./pages/AdminLogin";
 import AdminSignup from "./pages/AdminSignup";
 import Dashboard from "./pages/Dashboard";
 import Documentation from "./pages/Documentation";
+import VerifyEmail from "./pages/VerifyEmail";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
       <Route path="/documentation" element={<Documentation />} />
       <Route path="/login" element={<AdminLogin />} />
       <Route path="/signup" element={<AdminSignup />} />
+      <Route path="/verify-email" element={<VerifyEmail />} />
       <Route path="/admin" element={<Admin />} />
       <Route path="/admin/dashboard" element={<Dashboard />} />
       <Route path="/register-display" element={<DisplayRegister />} />

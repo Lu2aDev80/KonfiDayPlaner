@@ -59,7 +59,38 @@ const AdminLogin: React.FC = () => {
       });
       navigate(`/admin/dashboard?org=${selectedOrgId}`, { replace: true });
     } catch (err: any) {
-      alert(err.message || "Login fehlgeschlagen");
+      const errorMessage = err.message || "Login fehlgeschlagen";
+
+      // Check if it's an email verification error
+      if (errorMessage.includes("Email not verified")) {
+        if (
+          confirm(
+            "Deine E-Mail-Adresse ist noch nicht bestätigt. Möchtest du eine neue Bestätigungs-E-Mail erhalten?"
+          )
+        ) {
+          try {
+            // Extract user email from the error context if available
+            // For now, we'll ask the user to enter their email
+            const email = credentials.username.includes("@")
+              ? credentials.username
+              : prompt("Bitte gib deine E-Mail-Adresse ein:");
+
+            if (email) {
+              await api.resendVerification(email, selectedOrgId);
+              alert(
+                "Eine neue Bestätigungs-E-Mail wurde gesendet! Bitte überprüfe dein Postfach."
+              );
+            }
+          } catch (resendError: any) {
+            alert(
+              "Fehler beim Senden der Bestätigungs-E-Mail: " +
+                (resendError.message || "Unbekannter Fehler")
+            );
+          }
+        }
+      } else {
+        alert(errorMessage);
+      }
     }
   };
 
