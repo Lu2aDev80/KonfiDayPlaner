@@ -1,26 +1,24 @@
-# Use full Node image (not Alpine) to avoid binary compatibility issues
-FROM node:22-slim
+# Use full Node.js image with all build tools
+FROM node:22
 
 WORKDIR /usr/src/app
 
-# Copy package files and prisma schema
+# Copy package files
 COPY package*.json ./
 COPY prisma ./prisma
 
-# Install dependencies including production essentials
-RUN npm ci --omit=dev && \
-    npm install tsx && \
-    npm cache clean --force
+# Install ALL dependencies (including devDependencies with tsx)
+RUN npm ci
 
-# Copy server code and shared services
+# Copy server source
 COPY server ./server
 COPY src/services ./src/services
 
-# Generate Prisma client
+# Generate Prisma Client
 RUN npx prisma generate
 
 ENV NODE_ENV=production
 EXPOSE 3000
 
-# Run migrations and start server with tsx (now definitely installed)
-CMD ["sh", "-c", "npx prisma migrate deploy && npx tsx server/index.ts"]
+# Use node --loader to run TypeScript directly without tsx
+CMD ["sh", "-c", "npx prisma migrate deploy && node --import tsx server/index.ts"]
