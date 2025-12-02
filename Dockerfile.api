@@ -12,6 +12,8 @@ RUN npm ci
 
 # Copy server code after deps install
 COPY server ./server
+# Copy shared service code used by server (Prisma client wrapper)
+COPY src/services ./src/services
 
 # Generate Prisma client (in case npm ci didn't run it)
 RUN npm run db:generate
