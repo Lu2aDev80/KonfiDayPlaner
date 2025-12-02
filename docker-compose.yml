@@ -2,6 +2,8 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: konfidayplaner-postgres
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-konfiadmin}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-konfi2024secure}
@@ -24,6 +26,8 @@ services:
       context: .
       dockerfile: Dockerfile.api
     container_name: konfidayplaner-api
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
     depends_on:
       postgres:
         condition: service_healthy
@@ -62,6 +66,8 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: konfidayplaner-app
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
     # Frontend does not need to wait for DB/API; Nginx can start independently
     ports:
       - '8080:80'
@@ -71,12 +77,16 @@ services:
 
   watchtower:
     image: containrrr/watchtower
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - WATCHTOWER_POLL_INTERVAL=300
       - WATCHTOWER_CLEANUP=true
       - WATCHTOWER_INCLUDE_RESTARTING=true
+      - WATCHTOWER_INCLUDE_STOPPED=false
+      - WATCHTOWER_LABEL_ENABLE=true
     restart: unless-stopped
     networks:
       - app-network
