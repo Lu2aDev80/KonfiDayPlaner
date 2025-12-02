@@ -25,8 +25,12 @@ export type VerifyEmailResponse = {
 };
 export type ResendVerificationResponse = { message: string };
 
+// Get API base URL from environment or default to relative path
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+
 async function json<T>(input: RequestInfo, init?: RequestInit): Promise<T> {
-  const res = await fetch(input, { credentials: "include", ...init });
+  const url = typeof input === 'string' ? `${API_BASE_URL}${input}` : input;
+  const res = await fetch(url, { credentials: "include", ...init });
   if (!res.ok) {
     let err: any = null;
     try {
