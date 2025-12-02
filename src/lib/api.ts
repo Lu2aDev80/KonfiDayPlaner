@@ -38,6 +38,9 @@ async function json<T>(input: RequestInfo, init?: RequestInit): Promise<T> {
 }
 
 export const api = {
+  health(): Promise<{ok: boolean}> {
+    return json<{ok: boolean}>("/api/health");
+  },
   organisations(): Promise<Organisation[]> {
     return json<Organisation[]>("/api/organisations");
   },

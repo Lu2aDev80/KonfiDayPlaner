@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { organisations } from '../../data/organisations';
 import OrganisationCard from '../ui/OrganisationCard';
 import styles from './OrganisationSelect.module.css';
+import { api } from '../../lib/api';
 
 interface OrganisationSelectProps {
   isLogin?: boolean;
@@ -10,6 +11,47 @@ interface OrganisationSelectProps {
 
 const OrganisationSelect: React.FC<OrganisationSelectProps> = ({ isLogin = false }) => {
   const navigate = useNavigate();
+  const [dbStatus, setDbStatus] = useState<{
+    api: boolean;
+    db: boolean;
+    loading: boolean;
+    lastCheck: string | null;
+  }>({ api: false, db: false, loading: true, lastCheck: null });
+
+  // Check database connection status
+  useEffect(() => {
+    const checkStatus = async () => {
+      setDbStatus(prev => ({ ...prev, loading: true }));
+      try {
+        // Check API health
+        await api.health();
+        
+        // Check if we can load organisations (tests DB connection)
+        await api.organisations();
+        
+        setDbStatus({
+          api: true,
+          db: true,
+          loading: false,
+          lastCheck: new Date().toLocaleTimeString('de-DE')
+        });
+      } catch (error) {
+        console.error('Status check failed:', error);
+        setDbStatus({
+          api: false,
+          db: false,
+          loading: false,
+          lastCheck: new Date().toLocaleTimeString('de-DE')
+        });
+      }
+    };
+
+    checkStatus();
+    
+    // Check every 30 seconds
+    const interval = setInterval(checkStatus, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleOrganisationSelect = (orgId: string) => {
     // Store selected organisation in localStorage
@@ -33,6 +75,67 @@ const OrganisationSelect: React.FC<OrganisationSelectProps> = ({ isLogin = false
         <p className={styles.selectSubtitle}>
           Wähle eine Organisation aus, um fortzufahren
         </p>
+      </div>
+
+      {/* Debug Status Panel */}
+      <div style={{
+        position: 'fixed',
+        bottom: '20px',
+        right: '20px',
+        background: dbStatus.api && dbStatus.db ? '#10b981' : '#ef4444',
+        color: 'white',
+        padding: '12px 16px',
+        borderRadius: '8px',
+        fontSize: '0.75rem',
+        fontFamily: 'monospace',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+        border: '2px solid rgba(255,255,255,0.2)',
+        minWidth: '200px',
+        zIndex: 1000
+      }}>
+        <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>🔧 Debug Status</div>
+        <div>API: {dbStatus.loading ? '⏳' : dbStatus.api ? '✅' : '❌'}</div>
+        <div>DB: {dbStatus.loading ? '⏳' : dbStatus.db ? '✅' : '❌'}</div>
+        {dbStatus.lastCheck && (
+          <div style={{ fontSize: '0.65rem', opacity: 0.8, marginTop: '4px' }}>
+            Letzter Check: {dbStatus.lastCheck}
+          </div>
+        )}
+        <button
+          onClick={async () => {
+            setDbStatus(prev => ({ ...prev, loading: true }));
+            try {
+              await api.health();
+              await api.organisations();
+              setDbStatus({
+                api: true,
+                db: true,
+                loading: false,
+                lastCheck: new Date().toLocaleTimeString('de-DE')
+              });
+            } catch (error) {
+              setDbStatus({
+                api: false,
+                db: false,
+                loading: false,
+                lastCheck: new Date().toLocaleTimeString('de-DE')
+              });
+            }
+          }}
+          style={{
+            background: 'rgba(255,255,255,0.2)',
+            border: '1px solid rgba(255,255,255,0.3)',
+            color: 'white',
+            padding: '4px 8px',
+            borderRadius: '4px',
+            fontSize: '0.65rem',
+            cursor: 'pointer',
+            marginTop: '8px',
+            width: '100%'
+          }}
+        >
+          🔄 Erneut prüfen
+        </button>
       </div>
 
       <div className={styles.organisationGrid}>

@@ -21,20 +21,65 @@ const AdminLogin: React.FC = () => {
   >([]);
   const [loadingOrgs, setLoadingOrgs] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [dbStatus, setDbStatus] = useState<{
+    api: boolean;
+    db: boolean;
+    loading: boolean;
+    lastCheck: string | null;
+  }>({ api: false, db: false, loading: true, lastCheck: null });
 
   useEffect(() => {
     const load = async () => {
       try {
         setLoadingOrgs(true);
+        setDbStatus(prev => ({ ...prev, loading: true }));
+        
+        // Check API health
+        await api.health();
+        
+        // Load organisations (tests DB connection)
         const data = await api.organisations();
         setOrgs(data);
+        
+        setDbStatus({
+          api: true,
+          db: true,
+          loading: false,
+          lastCheck: new Date().toLocaleTimeString('de-DE')
+        });
       } catch (e: any) {
         setError(e.message ?? "Fehler beim Laden der Organisationen");
+        setDbStatus({
+          api: false,
+          db: false,
+          loading: false,
+          lastCheck: new Date().toLocaleTimeString('de-DE')
+        });
       } finally {
         setLoadingOrgs(false);
       }
     };
     load();
+    
+    // Check every 30 seconds
+    const interval = setInterval(async () => {
+      try {
+        await api.health();
+        setDbStatus(prev => ({
+          ...prev,
+          api: true,
+          lastCheck: new Date().toLocaleTimeString('de-DE')
+        }));
+      } catch {
+        setDbStatus(prev => ({
+          ...prev,
+          api: false,
+          lastCheck: new Date().toLocaleTimeString('de-DE')
+        }));
+      }
+    }, 30000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   const handleOrganisationSelect = (orgId: string) => {
@@ -586,6 +631,70 @@ const AdminLogin: React.FC = () => {
         >
           ← Zurück zur Startseite
         </button>
+
+        {/* Debug Status Panel */}
+        <div style={{
+          position: 'fixed',
+          bottom: '20px',
+          left: '20px',
+          background: dbStatus.api && dbStatus.db ? '#10b981' : '#ef4444',
+          color: 'white',
+          padding: '12px 16px',
+          borderRadius: '8px',
+          fontSize: '0.75rem',
+          fontFamily: 'monospace',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+          border: '2px solid rgba(255,255,255,0.2)',
+          minWidth: '200px',
+          zIndex: 999
+        }}>
+          <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>🔧 Debug Status</div>
+          <div>API: {dbStatus.loading ? '⏳' : dbStatus.api ? '✅' : '❌'}</div>
+          <div>DB: {dbStatus.loading ? '⏳' : dbStatus.db ? '✅' : '❌'}</div>
+          {dbStatus.lastCheck && (
+            <div style={{ fontSize: '0.65rem', opacity: 0.8, marginTop: '4px' }}>
+              Letzter Check: {dbStatus.lastCheck}
+            </div>
+          )}
+          <button
+            onClick={async () => {
+              setDbStatus(prev => ({ ...prev, loading: true }));
+              try {
+                await api.health();
+                const data = await api.organisations();
+                setOrgs(data);
+                setDbStatus({
+                  api: true,
+                  db: true,
+                  loading: false,
+                  lastCheck: new Date().toLocaleTimeString('de-DE')
+                });
+                setError(null);
+              } catch (error: any) {
+                setError(error.message ?? "Verbindungsfehler");
+                setDbStatus({
+                  api: false,
+                  db: false,
+                  loading: false,
+                  lastCheck: new Date().toLocaleTimeString('de-DE')
+                });
+              }
+            }}
+            style={{
+              background: 'rgba(255,255,255,0.2)',
+              border: '1px solid rgba(255,255,255,0.3)',
+              color: 'white',
+              padding: '4px 8px',
+              borderRadius: '4px',
+              fontSize: '0.65rem',
+              cursor: 'pointer',
+              marginTop: '8px',
+              width: '100%'
+            }}
+          >
+            🔄 Erneut prüfen
+          </button>
+        </div>
 
         {/* Schlafender Gremlin für zukünftige Hilfe-Funktion */}
         <div
