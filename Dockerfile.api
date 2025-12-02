@@ -1,45 +1,26 @@
-###############################
-# Stage 1: Build (compile TS) #
-###############################
-FROM node:22 AS builder
+# Use full Node image (not Alpine) to avoid binary compatibility issues
+FROM node:22-slim
 
 WORKDIR /usr/src/app
 
-# Copy package manifests and prisma schema first (needed for postinstall)
+# Copy package files and prisma schema
 COPY package*.json ./
 COPY prisma ./prisma
 
-# Install all deps (need devDeps for TypeScript compilation and prisma)
-RUN npm ci
+# Install dependencies including production essentials
+RUN npm ci --omit=dev && \
+    npm install tsx && \
+    npm cache clean --force
 
 # Copy server code and shared services
 COPY server ./server
 COPY src/services ./src/services
-COPY tsconfig*.json ./
 
-# Generate Prisma client (in case npm ci didn't run it)
-RUN npm run db:generate
+# Generate Prisma client
+RUN npx prisma generate
 
-# Compile TypeScript server code to JavaScript
-RUN npx tsc --project tsconfig.json --outDir dist-server --rootDir . --module ESNext --target ES2022 --moduleResolution node --esModuleInterop --allowSyntheticDefaultImports
-
-################################
-# Stage 2: Runtime (minimal)   #
-################################
-FROM node:22-alpine AS runtime
-
-WORKDIR /usr/src/app
-
-# Default env (can be overridden)
 ENV NODE_ENV=production
-
-# Copy only production dependencies and compiled code
-COPY --from=builder /usr/src/app/node_modules ./node_modules
-COPY --from=builder /usr/src/app/dist-server ./dist-server
-COPY --from=builder /usr/src/app/prisma ./prisma
-COPY package*.json ./
-
 EXPOSE 3000
 
-# Start script that applies migrations then runs the compiled server
-CMD sh -c "npm run db:migrate && node dist-server/server/index.js"
+# Run migrations and start server with tsx (now definitely installed)
+CMD ["sh", "-c", "npx prisma migrate deploy && npx tsx server/index.ts"]
