@@ -1,6 +1,6 @@
-# Contributing to KonfiDay Planer
+# Contributing to Chaos Ops
 
-Thank you for considering contributing to KonfiDay Planer! This document provides guidelines and instructions for contributing.
+Thank you for considering contributing to Chaos Ops! This document provides guidelines and instructions for contributing.
 
 ## Code of Conduct
 
@@ -13,7 +13,7 @@ Thank you for considering contributing to KonfiDay Planer! This document provide
 1. Fork the repository
 2. Clone your fork:
    ```bash
-   git clone https://github.com/YOUR_USERNAME/KonfiDayPlaner.git
+   git clone https://github.com/YOUR_USERNAME/ChaosOps.git
    ```
 3. Create a new branch:
    ```bash

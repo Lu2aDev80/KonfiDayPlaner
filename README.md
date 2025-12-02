@@ -1,6 +1,6 @@
-# KonfiDay Planer
+# Chaos Ops
 
-A modern web application for managing and displaying schedules for Konfi Day events. Built with React, TypeScript, and Vite.
+A modern web application for managing and displaying schedules for events and gatherings. Built with React, TypeScript, and Vite.
 
 ## Features
 
@@ -25,7 +25,7 @@ A modern web application for managing and displaying schedules for Konfi Day eve
 ## Project Structure
 
 ```
-KonfiDayPlaner/
+Chaos Ops/
 ├── public/              # Static assets
 ├── src/
 │   ├── assets/         # Images, fonts, etc.
@@ -62,7 +62,7 @@ KonfiDayPlaner/
 1. Clone the repository:
 ```bash
 git clone https://github.com/Lu2aDev80/KonfiDayPlaner.git
-cd KonfiDayPlaner
+cd ChaosOps
 ```
 
 2. Install dependencies:
@@ -165,4 +165,4 @@ This project is private and proprietary.
 
 ## Acknowledgments
 
-Built for managing Konfi Day events efficiently.
+Built for managing events and gatherings efficiently.

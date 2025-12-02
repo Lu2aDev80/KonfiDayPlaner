@@ -56,8 +56,8 @@ This project now uses PostgreSQL as the database and Prisma ORM for database man
 
 2. **Create database:**
    ```sql
-   CREATE DATABASE konfidayplaner;
-   CREATE USER konfiadmin WITH PASSWORD 'konfi2024secure';
+   CREATE DATABASE chaosops;
+   CREATE USER chaosadmin WITH PASSWORD 'chaos2024secure';
    GRANT ALL PRIVILEGES ON DATABASE konfidayplaner TO konfiadmin;
    ```
 

@@ -21,11 +21,43 @@ services:
       timeout: 5s
       retries: 5
 
-  app:
-    image: luca3008/konfidayplaner:latest
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: konfidayplaner-api
     depends_on:
       postgres:
         condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-konfiadmin}:${POSTGRES_PASSWORD:-konfi2024secure}@postgres:5432/${POSTGRES_DB:-konfidayplaner}?schema=public
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      PRISMA_LOG: ${PRISMA_LOG:-warn}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      MAIL_FROM_NAME: ${MAIL_FROM_NAME:-KonfiDayPlaner}
+      MAIL_FROM_EMAIL: ${MAIL_FROM_EMAIL:-info@lu2adevelopment.de}
+    ports:
+      - '3000:3000'
+    restart: unless-stopped
+    networks:
+      - app-network
+    env_file:
+      - .env.production
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: konfidayplaner-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      api:
+        condition: service_started
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-konfiadmin}:${POSTGRES_PASSWORD:-konfi2024secure}@postgres:5432/${POSTGRES_DB:-konfidayplaner}?schema=public
     ports:
@@ -33,6 +65,8 @@ services:
     restart: unless-stopped
     networks:
       - app-network
+    env_file:
+      - .env.production
 
   watchtower:
     image: containrrr/watchtower
