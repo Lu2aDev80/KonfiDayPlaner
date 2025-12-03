@@ -6,6 +6,7 @@ import authRoutes from './routes/auth'
 import organisationsRoutes from './routes/organisations'
 import emailRoutes from "./routes/email";
 import { logger } from "./logger";
+import { testConnection, isEmailEnabled } from "./mailer";
 
 const app = express();
 const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
@@ -61,7 +62,8 @@ app.get("/api/health", (_req: Request, res: Response) => {
     ok: true, 
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV,
-    allowedOrigins: allowedOrigins
+    allowedOrigins: allowedOrigins,
+    emailEnabled: isEmailEnabled()
   });
 });
 
@@ -70,6 +72,29 @@ app.use("/api/organisations", organisationsRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/email", emailRoutes);
 
+// Test SMTP connection on startup (non-blocking)
+async function testEmailOnStartup() {
+  logger.info('Testing SMTP connection on startup...');
+  const result = await testConnection();
+  
+  if (result.success) {
+    logger.info('✓ Email service ready', result.config);
+  } else {
+    logger.warn('✗ Email service unavailable - will continue without email functionality', {
+      error: result.error,
+      config: result.config
+    });
+    logger.warn('To enable email: Configure SMTP_HOST, SMTP_USER, SMTP_PASS environment variables');
+  }
+}
+
 app.listen(PORT, () => {
   logger.info(`API listening on http://localhost:${PORT}`)
+  
+  // Test email connection after server starts (don't block startup)
+  setTimeout(() => {
+    testEmailOnStartup().catch(err => {
+      logger.error('Error during email startup test', { error: err.message });
+    });
+  }, 1000);
 })

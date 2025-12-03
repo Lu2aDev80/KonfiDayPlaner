@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express'
-import { sendMail, testConnection } from '../mailer'
+import { sendMail, testConnection, isEmailEnabled } from '../mailer'
 import { renderTestEmail } from '../templates/testEmail'
 import { logger } from '../logger'
 
@@ -22,45 +22,57 @@ router.post('/test', async (req: Request, res: Response) => {
     logger.warn('Invalid email format', { to })
     return res.status(400).json({ error: 'Invalid email address format' })
   }
+
+  // Check if email is enabled
+  if (!isEmailEnabled()) {
+    logger.warn('Email test requested but email is disabled')
+    return res.status(503).json({
+      success: false,
+      error: 'Email service not configured',
+      message: 'Email functionality is currently unavailable. Check SMTP configuration.'
+    })
+  }
   
   try {
     logger.info('Rendering test email template')
     const html = renderTestEmail(name)
     
     logger.info('Attempting to send test email', { to, hasName: !!name })
-    await sendMail({
+    const result = await sendMail({
       to,
       subject: 'KonfiDayPlaner: Test E-Mail 🎉',
       text: `Hallo ${name || 'there'}! Dies ist eine Test-E-Mail vom KonfiDayPlaner. Wenn du diese Nachricht erhältst, funktioniert deine E-Mail-Konfiguration einwandfrei.`,
       html,
     })
     
-    logger.info('Test email sent successfully', { to })
-    res.json({ 
-      ok: true, 
-      message: 'Email sent successfully',
-      to 
-    })
+    if (result.success) {
+      logger.info('Test email sent successfully', { to, messageId: result.messageId })
+      res.json({ 
+        ok: true,
+        success: true,
+        message: 'Email sent successfully',
+        messageId: result.messageId,
+        to 
+      })
+    } else {
+      logger.warn('Test email failed', { to, error: result.error, code: result.code })
+      res.status(503).json({
+        success: false,
+        error: result.error || 'Failed to send email',
+        code: result.code,
+        message: 'Email could not be sent. Check server logs for details.'
+      })
+    }
   } catch (e: any) {
-    logger.error('Failed to send test email', { 
+    logger.error('Unexpected error in email test', { 
       error: e?.message, 
-      code: e?.code,
-      to,
-      stack: process.env.NODE_ENV === 'development' ? e?.stack : undefined
+      to
     })
-    
-    // Provide detailed error message in development
-    const errorDetails = process.env.NODE_ENV === 'development' 
-      ? { 
-          message: e?.message,
-          code: e?.code,
-          stack: e?.stack 
-        }
-      : { message: e?.message || 'Failed to send email' }
     
     res.status(500).json({ 
-      error: e?.message || 'Failed to send email',
-      details: errorDetails
+      success: false,
+      error: 'Internal server error',
+      message: 'An unexpected error occurred'
     })
   }
 })
@@ -77,18 +89,20 @@ router.post('/test-connection', async (req: Request, res: Response) => {
       res.json(result)
     } else {
       logger.warn('SMTP connection test failed', result)
-      res.status(500).json(result)
+      res.status(503).json({
+        ...result,
+        message: 'Could not connect to SMTP server. Check configuration and network.'
+      })
     }
   } catch (error: any) {
-    logger.error('Error testing SMTP connection', { 
-      error: error.message,
-      stack: error.stack
+    logger.error('Unexpected error in connection test', { 
+      error: error.message
     })
     
     res.status(500).json({ 
       success: false, 
-      error: error.message,
-      message: 'Failed to test SMTP connection'
+      error: 'Internal server error',
+      message: 'An unexpected error occurred during connection test'
     })
   }
 })

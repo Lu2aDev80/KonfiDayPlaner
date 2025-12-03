@@ -11,121 +11,131 @@ export type MailOptions = {
   from?: string
 }
 
+export type EmailResult = {
+  success: boolean
+  messageId?: string
+  error?: string
+  code?: string
+}
+
 function getFromAddress(): string {
   const name = process.env.MAIL_FROM_NAME || 'KonfiDayPlaner'
-  const email = process.env.MAIL_FROM_EMAIL || 'info@lu2adevelopment.de'
+  const email = process.env.MAIL_FROM_EMAIL || 'noreply@localhost'
   return `${name} <${email}>`
 }
 
 let transporter: Transporter | null = null
+let emailEnabled = true // Flag to disable email after repeated failures
 
-export function getTransporter(): Transporter {
-  if (transporter) return transporter
-  
+function isEmailConfigured(): boolean {
   const host = process.env.SMTP_HOST
-  const port = Number(process.env.SMTP_PORT || 587)
   const user = process.env.SMTP_USER
   const pass = process.env.SMTP_PASS
+  return !!(host && user && pass)
+}
+
+export function getTransporter(): Transporter | null {
+  if (!emailEnabled) {
+    logger.warn('Email functionality is disabled due to previous errors')
+    return null
+  }
+
+  if (transporter) return transporter
+  
+  if (!isEmailConfigured()) {
+    logger.warn('SMTP not configured. Email functionality will be disabled.')
+    logger.info('To enable emails, set: SMTP_HOST, SMTP_USER, SMTP_PASS')
+    emailEnabled = false
+    return null
+  }
+
+  const host = process.env.SMTP_HOST!
+  const port = Number(process.env.SMTP_PORT || 587)
+  const user = process.env.SMTP_USER!
+  const pass = process.env.SMTP_PASS!
   const secure = String(process.env.SMTP_SECURE || '').toLowerCase() === 'true' || port === 465
   const ignoreTLS = String(process.env.SMTP_IGNORE_TLS || '').toLowerCase() === 'true'
   const requireTLS = String(process.env.SMTP_REQUIRE_TLS || '').toLowerCase() === 'true'
-  const rejectUnauthorized = String(process.env.SMTP_REJECT_UNAUTHORIZED || 'true').toLowerCase() !== 'false'
+  const rejectUnauthorized = String(process.env.SMTP_REJECT_UNAUTHORIZED || 'false').toLowerCase() !== 'false'
 
-  if (!host || !user || !pass) {
-    logger.warn('SMTP not fully configured. Set SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS')
-    logger.warn('Email functionality will be limited until SMTP is configured')
-    logger.warn('Current SMTP config:', {
-      host: host || 'NOT SET',
-      port: port || 'NOT SET',
-      user: user || 'NOT SET',
-      pass: pass ? '***SET***' : 'NOT SET'
-    })
-  } else {
-    logger.info('SMTP configuration found', {
-      host,
-      port,
-      user: user.substring(0, 5) + '***'
-    })
-  }
-
-  logger.info('Creating SMTP transporter', { 
-    host, 
-    port, 
-    secure, 
-    user: user ? '***' : undefined,
-    ignoreTLS, 
-    requireTLS,
-    rejectUnauthorized
+  logger.info('Initializing SMTP transporter', {
+    host,
+    port,
+    secure,
+    user: user.substring(0, 5) + '***'
   })
-
-  // Verify nodemailer is available
-  if (!nodemailer || typeof nodemailer.createTransport !== 'function') {
-    throw new Error('nodemailer is not properly installed or imported')
-  }
 
   try {
     transporter = nodemailer.createTransport({
       host,
       port,
       secure,
-      auth: user && pass ? { user, pass } : undefined,
+      auth: { user, pass },
       tls: {
         ignoreTLS,
         requireTLS,
         rejectUnauthorized,
-        // Cipher configuration for older servers
         ciphers: 'SSLv3'
       },
-      // Connection timeout
-      connectionTimeout: 10000,
-      greetingTimeout: 5000,
-      socketTimeout: 10000,
-      // Enable debugging
-      debug: process.env.NODE_ENV !== 'production',
-      logger: process.env.NODE_ENV !== 'production'
+      connectionTimeout: 15000,
+      greetingTimeout: 10000,
+      socketTimeout: 15000,
+      pool: true, // Use pooled connections
+      maxConnections: 5,
+      maxMessages: 100,
+      debug: process.env.LOG_LEVEL === 'debug',
+      logger: process.env.LOG_LEVEL === 'debug'
     } as SMTPTransport.Options)
     
     logger.info('SMTP transporter created successfully')
     return transporter
   } catch (error: any) {
     logger.error('Failed to create SMTP transporter', { error: error.message })
-    throw new Error(`Failed to initialize email service: ${error.message}`)
+    emailEnabled = false
+    return null
   }
 }
 
-export async function sendMail(opts: MailOptions) {
+export async function sendMail(opts: MailOptions): Promise<EmailResult> {
+  // Validate input
   if (!opts.to) {
-    throw new Error('Email recipient (to) is required')
+    return { success: false, error: 'Email recipient is required' }
   }
   
   if (!opts.subject) {
-    throw new Error('Email subject is required')
+    return { success: false, error: 'Email subject is required' }
   }
   
   if (!opts.html && !opts.text) {
-    throw new Error('Email must have either html or text content')
+    return { success: false, error: 'Email content is required' }
   }
 
-  let tx: Transporter
-  try {
-    tx = getTransporter()
-  } catch (error: any) {
-    logger.error('Failed to get transporter', { error: error.message })
-    throw new Error(`Email service unavailable: ${error.message}`)
+  // Check if email is configured
+  if (!isEmailConfigured()) {
+    logger.warn('Email not sent - SMTP not configured', { to: opts.to, subject: opts.subject })
+    return { 
+      success: false, 
+      error: 'Email service not configured',
+      code: 'NOT_CONFIGURED'
+    }
+  }
+
+  // Get transporter
+  const tx = getTransporter()
+  if (!tx) {
+    logger.warn('Email not sent - transporter unavailable', { to: opts.to, subject: opts.subject })
+    return { 
+      success: false, 
+      error: 'Email service unavailable',
+      code: 'NO_TRANSPORTER'
+    }
   }
   
   try {
-    // Test the connection first (but don't fail if it doesn't work)
-    logger.info('Attempting SMTP connection verification...')
-    try {
-      await tx.verify()
-      logger.info('SMTP connection verified successfully')
-    } catch (verifyError: any) {
-      logger.warn('SMTP verification failed, but will try to send anyway', {
-        error: verifyError.message,
-        code: verifyError.code
-      })
-    }
+    logger.info('Sending email', { 
+      to: Array.isArray(opts.to) ? opts.to.join(',') : opts.to,
+      subject: opts.subject
+    })
     
     const info = await tx.sendMail({
       from: opts.from || getFromAddress(),
@@ -135,75 +145,101 @@ export async function sendMail(opts: MailOptions) {
       html: opts.html,
     })
     
-    logger.info('Mail sent successfully', { 
+    logger.info('Email sent successfully', { 
       messageId: info.messageId, 
       to: Array.isArray(opts.to) ? opts.to.join(',') : opts.to,
       accepted: info.accepted,
       rejected: info.rejected
     })
     
-    return info
+    return {
+      success: true,
+      messageId: info.messageId
+    }
   } catch (error: any) {
-    logger.error('Failed to send mail', { 
+    logger.error('Failed to send email', { 
       error: error.message, 
       code: error.code,
-      command: error.command,
-      to: opts.to,
-      stack: error.stack
+      to: opts.to
     })
     
-    // Provide more helpful error messages
-    let errorMessage = error.message
-    if (error.code === 'EAUTH') {
-      errorMessage = 'Authentication failed. Check SMTP username and password.'
-    } else if (error.code === 'ECONNECTION') {
-      errorMessage = 'Could not connect to SMTP server. Check host and port.'
-    } else if (error.code === 'ETIMEDOUT') {
-      errorMessage = 'Connection timed out. Check network and SMTP server status.'
+    // Don't disable email for temporary errors
+    const temporaryErrors = ['ETIMEDOUT', 'ECONNRESET', 'ENOTFOUND']
+    if (!temporaryErrors.includes(error.code)) {
+      // Disable email for persistent configuration issues
+      if (error.code === 'EAUTH' || error.message.includes('Access denied')) {
+        logger.error('Disabling email due to authentication/access error')
+        emailEnabled = false
+        transporter = null
+      }
     }
     
-    throw new Error(`Email delivery failed: ${errorMessage}`)
+    return {
+      success: false,
+      error: error.message,
+      code: error.code
+    }
   }
 }
 
-// Test function for debugging
-export async function testConnection() {
+export async function sendMailSafe(opts: MailOptions): Promise<boolean> {
+  const result = await sendMail(opts)
+  return result.success
+}
+
+export async function testConnection(): Promise<EmailResult & { config?: any }> {
+  if (!isEmailConfigured()) {
+    return {
+      success: false,
+      error: 'SMTP not configured',
+      config: {
+        host: 'not set',
+        port: 'not set',
+        user: 'not set'
+      }
+    }
+  }
+
+  const tx = getTransporter()
+  if (!tx) {
+    return {
+      success: false,
+      error: 'Could not create transporter'
+    }
+  }
+
   try {
     logger.info('Testing SMTP connection...')
-    const tx = getTransporter()
-    
-    logger.info('Verifying SMTP connection...')
     await tx.verify()
-    
     logger.info('SMTP connection test successful')
-    return { 
-      success: true, 
-      message: 'SMTP connection successful',
+    
+    return {
+      success: true,
       config: {
         host: process.env.SMTP_HOST,
         port: process.env.SMTP_PORT,
-        secure: process.env.SMTP_SECURE,
         user: process.env.SMTP_USER ? '***configured***' : 'not set'
       }
     }
   } catch (error: any) {
     logger.error('SMTP connection test failed', {
       error: error.message,
-      code: error.code,
-      command: error.command
+      code: error.code
     })
     
-    return { 
-      success: false, 
-      message: `SMTP connection failed: ${error.message}`,
+    return {
+      success: false,
+      error: error.message,
       code: error.code,
-      command: error.command,
       config: {
-        host: process.env.SMTP_HOST || 'not set',
-        port: process.env.SMTP_PORT || 'not set',
-        secure: process.env.SMTP_SECURE || 'not set',
+        host: process.env.SMTP_HOST,
+        port: process.env.SMTP_PORT,
         user: process.env.SMTP_USER ? '***configured***' : 'not set'
       }
     }
   }
+}
+
+export function isEmailEnabled(): boolean {
+  return emailEnabled && isEmailConfigured()
 }
