@@ -44,7 +44,8 @@ const VerifyEmail: React.FC = () => {
   const verifyEmail = async (verificationToken: string) => {
     setVerifying(true);
     try {
-      const response = await fetch('/api/auth/verify-email', {
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '';
+      const response = await fetch(`${apiBaseUrl}/api/auth/verify-email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -89,7 +90,8 @@ const VerifyEmail: React.FC = () => {
 
     setResending(true);
     try {
-      const response = await fetch('/api/auth/resend-verification', {
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '';
+      const response = await fetch(`${apiBaseUrl}/api/auth/resend-verification`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

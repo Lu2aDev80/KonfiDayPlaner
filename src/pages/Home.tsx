@@ -24,7 +24,8 @@ const Home: React.FC = () => {
     setEmailResult(null);
 
     try {
-      const res = await fetch("/api/email/test", {
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '';
+      const res = await fetch(`${apiBaseUrl}/api/email/test`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
