@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client'
+import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
@@ -34,19 +35,21 @@ async function main() {
     console.log(`  ✓ Created/Updated: ${org.name}`)
   }
 
-  // Seed a demo admin user (password should be hashed in production)
+  // Seed a demo admin user with hashed password
   console.log('👤 Seeding admin user...')
+  const adminPassword = process.env.ADMIN_PASSWORD || 'admin123'
+  const adminPasswordHash = await bcrypt.hash(adminPassword, 12)
+  
   await prisma.adminUser.upsert({
     where: { username: 'admin' },
     update: {},
     create: {
       username: 'admin',
       email: 'admin@konfidayplaner.de',
-      // In production, this should be properly hashed with bcrypt
-      passwordHash: 'CHANGE_ME_IN_PRODUCTION',
+      passwordHash: adminPasswordHash,
     },
   })
-  console.log('  ✓ Created/Updated: admin user')
+  console.log('  ✓ Created/Updated: admin user (password from ADMIN_PASSWORD env or default)')
 
   console.log('✅ Database seeding completed!')
 }

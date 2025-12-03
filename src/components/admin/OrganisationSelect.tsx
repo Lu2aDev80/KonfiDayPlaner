@@ -113,7 +113,7 @@ const OrganisationSelect: React.FC<OrganisationSelectProps> = ({ isLogin = false
                 loading: false,
                 lastCheck: new Date().toLocaleTimeString('de-DE')
               });
-            } catch (error) {
+            } catch {
               setDbStatus({
                 api: false,
                 db: false,

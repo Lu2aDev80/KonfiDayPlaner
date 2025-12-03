@@ -18,6 +18,7 @@ dist-ssr
 .env.development.local
 .env.test.local
 .env.production.local
+.env.production
 
 # Prisma
 prisma/migrations
@@ -34,3 +35,10 @@ node_modules/@prisma
 *.njsproj
 *.sln
 *.sw?
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Docker volumes
+postgres_data/

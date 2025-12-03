@@ -55,14 +55,15 @@ Chaos Ops/
 ### Prerequisites
 
 - Node.js 18+ and npm
-- Docker (for containerized deployment)
+- Docker and Docker Compose (for containerized deployment)
+- PostgreSQL 16+ (if running locally without Docker)
 
 ### Installation
 
 1. Clone the repository:
 ```bash
 git clone https://github.com/Lu2aDev80/KonfiDayPlaner.git
-cd ChaosOps
+cd KonfiDayPlaner
 ```
 
 2. Install dependencies:
@@ -70,7 +71,17 @@ cd ChaosOps
 npm install
 ```
 
-3. Set up the database (see [DATABASE_SETUP.md](./DATABASE_SETUP.md) for details):
+3. Set up environment variables:
+```bash
+# For development
+cp .env.example .env.local
+
+# For production
+cp .env.production.template .env.production
+# Edit .env.production with your actual values
+```
+
+4. Set up the database (see [DATABASE_SETUP.md](./DATABASE_SETUP.md) for details):
 ```bash
 # Start PostgreSQL with Docker
 docker-compose up -d postgres
@@ -82,12 +93,17 @@ npm run db:migrate:dev
 npm run db:seed
 ```
 
-4. Start the development server:
+5. Start the development server:
 ```bash
-npm run dev
+# Start both frontend and API
+npm run dev:all
+
+# Or start them separately
+npm run dev      # Frontend only
+npm run api:dev  # API only
 ```
 
-5. Open your browser to `http://localhost:5173`
+6. Open your browser to `http://localhost:5173`
 
 ### Building for Production
 
@@ -97,8 +113,16 @@ npm run build
 
 ### Docker Deployment
 
+For production deployment, see [PRODUCTION_CHECKLIST.md](./PRODUCTION_CHECKLIST.md) for a complete guide.
+
 ```bash
+# Quick start
 docker-compose up -d
+
+# Check health
+./health-check.ps1  # Windows PowerShell
+# or
+./troubleshoot.sh   # Linux/Mac
 ```
 
 ## Available Scripts

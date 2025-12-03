@@ -35,6 +35,7 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER:-konfiadmin}:${POSTGRES_PASSWORD:-konfi2024secure}@postgres:5432/${POSTGRES_DB:-konfidayplaner}?schema=public
       LOG_LEVEL: ${LOG_LEVEL:-info}
       PRISMA_LOG: ${PRISMA_LOG:-warn}
+      NODE_ENV: ${NODE_ENV:-production}
       SMTP_HOST: ${SMTP_HOST:-mail.prepaid-mail.de}
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_USER: ${SMTP_USER:-info@lu2adevelopment.de}
@@ -47,6 +48,7 @@ services:
       MAIL_FROM_EMAIL: ${MAIL_FROM_EMAIL:-info@lu2adevelopment.de}
       APP_BASE_PATH: ${APP_BASE_PATH:-/minihackathon}
       FRONTEND_HOST: ${FRONTEND_HOST:-http://localhost:8080}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
     ports:
       - '3000:3000'
     restart: on-failure:3

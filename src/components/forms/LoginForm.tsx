@@ -22,7 +22,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ organisations }) => {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     // TODO: Implement login logic
-    console.log('Login attempt:', { selectedOrg, email, password });
     // Navigate to dashboard after successful login
     navigate('/admin/dashboard');
   };

@@ -1,4 +1,4 @@
-import express from 'express'
+import express, { Request, Response, NextFunction } from 'express'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import authRoutes from './routes/auth'
@@ -13,7 +13,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 // Request logging middleware
-app.use((req: any, res: any, next: any) => {
+app.use((req: Request, _res: Response, next: NextFunction) => {
   logger.info(`${req.method} ${req.path} - Origin: ${req.get('origin') || 'none'}`);
   next();
 });
@@ -38,7 +38,7 @@ const allowedOrigins = [...devOrigins, ...productionOrigins];
 
 app.use(cors({ 
   origin: process.env.NODE_ENV === 'production' 
-    ? (origin: any, callback: any) => {
+    ? (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
         // In production, allow same-origin requests (no origin header) and configured origins
         if (!origin || allowedOrigins.includes(origin)) {
           callback(null, true);
@@ -54,7 +54,7 @@ app.use(cors({
 }));
 
 // Health
-app.get("/api/health", (_req: any, res: any) => {
+app.get("/api/health", (_req: Request, res: Response) => {
   logger.info("Health check requested");
   res.json({ 
     ok: true, 
