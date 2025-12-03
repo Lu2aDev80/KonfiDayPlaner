@@ -1,4 +1,4 @@
-export type Organisation = { id: string; name: string; description?: string }
+export type Organisation = { id: string; name: string; description?: string; logoUrl?: string }
 export type User = {
   id: string;
   username: string;
@@ -6,6 +6,7 @@ export type User = {
   organisationId: string;
   email?: string | null;
   emailVerified?: boolean;
+  createdAt?: string;
 };
 export type MeResponse = { user: User; organisation: Organisation };
 export type SignupResponse = {
@@ -24,9 +25,20 @@ export type VerifyEmailResponse = {
   organisation: Organisation;
 };
 export type ResendVerificationResponse = { message: string };
+export type UpdateOrganisationData = {
+  name: string;
+  description?: string;
+  logoUrl?: string;
+};
+export type InviteUserData = {
+  username: string;
+  email: string;
+  password: string;
+  role: "admin" | "member";
+};
 
-// Get API base URL from environment or default to relative path
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+// Get API base URL from environment or default to relative path with base path
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/minihackathon';
 
 async function json<T>(input: RequestInfo, init?: RequestInit): Promise<T> {
   const url = typeof input === 'string' ? `${API_BASE_URL}${input}` : input;
@@ -51,6 +63,48 @@ export const api = {
   },
   organisations(): Promise<Organisation[]> {
     return json<Organisation[]>("/api/organisations");
+  },
+  getOrganisation(id: string): Promise<Organisation> {
+    return json<Organisation>(`/api/organisations/${id}`);
+  },
+  updateOrganisation(id: string, data: UpdateOrganisationData): Promise<Organisation> {
+    return json<Organisation>(`/api/organisations/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+  },
+  uploadLogo(file: File): Promise<{success: boolean; logoUrl: string; filename: string}> {
+    const formData = new FormData();
+    formData.append('logo', file);
+    
+    const url = `${API_BASE_URL}/api/upload/logo`;
+    return fetch(url, {
+      method: 'POST',
+      credentials: 'include',
+      body: formData,
+    }).then(async (res) => {
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: res.statusText }));
+        throw new Error(err.error || res.statusText);
+      }
+      return res.json();
+    });
+  },
+  getOrganisationUsers(organisationId: string): Promise<User[]> {
+    return json<User[]>(`/api/organisations/${organisationId}/users`);
+  },
+  inviteUser(organisationId: string, data: InviteUserData): Promise<User> {
+    return json<User>(`/api/organisations/${organisationId}/users`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+  },
+  removeUser(organisationId: string, userId: string): Promise<{success: boolean; message: string}> {
+    return json<{success: boolean; message: string}>(`/api/organisations/${organisationId}/users/${userId}`, {
+      method: "DELETE",
+    });
   },
   signup(data: {
     orgName: string;

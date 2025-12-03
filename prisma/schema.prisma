@@ -15,6 +15,7 @@ model Organisation {
   id          String   @id @default(uuid())
   name        String
   description String?
+  logoUrl     String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   events      Event[]

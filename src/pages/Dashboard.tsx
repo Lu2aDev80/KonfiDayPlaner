@@ -10,6 +10,7 @@ import {
   FileText,
   Eye,
   Clock,
+  Settings,
 } from "lucide-react";
 import EventForm from "../components/forms/EventForm";
 import DayPlanForm from "../components/forms/DayPlanForm";
@@ -391,29 +392,55 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
 
-          <button
-            onClick={handleLogout}
-            style={{
-              ...buttonStyle,
-              backgroundColor: "#fff",
-              color: "#dc2626",
-              border: "2px solid #dc2626",
-              boxShadow: "2px 4px 0 #dc2626",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-2px)";
-              e.currentTarget.style.boxShadow = "3px 6px 0 #dc2626";
-              e.currentTarget.style.backgroundColor = "#fee2e2";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow = "2px 4px 0 #dc2626";
-              e.currentTarget.style.backgroundColor = "#fff";
-            }}
-          >
-            <LogOut size={18} />
-            Abmelden
-          </button>
+          <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+            <button
+              onClick={() => navigate(`/admin/settings?org=${orgId}`)}
+              style={{
+                ...buttonStyle,
+                backgroundColor: "#fff",
+                color: "#6366f1",
+                border: "2px solid #6366f1",
+                boxShadow: "2px 4px 0 #6366f1",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-2px)";
+                e.currentTarget.style.boxShadow = "3px 6px 0 #6366f1";
+                e.currentTarget.style.backgroundColor = "#eef2ff";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow = "2px 4px 0 #6366f1";
+                e.currentTarget.style.backgroundColor = "#fff";
+              }}
+              title="Organisation Settings"
+            >
+              <Settings size={18} />
+              Einstellungen
+            </button>
+            <button
+              onClick={handleLogout}
+              style={{
+                ...buttonStyle,
+                backgroundColor: "#fff",
+                color: "#dc2626",
+                border: "2px solid #dc2626",
+                boxShadow: "2px 4px 0 #dc2626",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-2px)";
+                e.currentTarget.style.boxShadow = "3px 6px 0 #dc2626";
+                e.currentTarget.style.backgroundColor = "#fee2e2";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow = "2px 4px 0 #dc2626";
+                e.currentTarget.style.backgroundColor = "#fff";
+              }}
+            >
+              <LogOut size={18} />
+              Abmelden
+            </button>
+          </div>
         </div>
 
         {/* Content Grid */}

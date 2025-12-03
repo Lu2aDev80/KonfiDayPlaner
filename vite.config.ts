@@ -6,10 +6,17 @@ export default defineConfig({
   plugins: [react()],
   base: "/minihackathon/",
   server: {
+    port: 5173,
     proxy: {
-      "/api": {
+      "/minihackathon/api": {
         target: "http://localhost:3000",
         changeOrigin: true,
+        secure: false,
+      },
+      "/minihackathon/uploads": {
+        target: "http://localhost:3000",
+        changeOrigin: true,
+        secure: false,
       },
     },
   },

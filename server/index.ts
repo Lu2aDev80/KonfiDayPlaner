@@ -2,9 +2,11 @@ import 'dotenv/config'
 import express, { Request, Response, NextFunction } from 'express'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
+import path from 'path'
 import authRoutes from './routes/auth'
 import organisationsRoutes from './routes/organisations'
 import emailRoutes from "./routes/email";
+import uploadRoutes from './routes/upload';
 import { logger } from "./logger";
 import { testConnection, isEmailEnabled } from "./mailer";
 
@@ -16,6 +18,9 @@ const apiBase = `${BASE_PATH}/api`;
 
 app.use(express.json());
 app.use(cookieParser());
+
+// Serve uploaded files statically
+app.use('/uploads', express.static(path.join(process.cwd(), 'public', 'uploads')));
 
 // Request logging middleware
 app.use((req: Request, _res: Response, next: NextFunction) => {
@@ -75,6 +80,7 @@ app.get(`${apiBase}/health`, (_req: Request, res: Response) => {
 app.use(`${apiBase}/organisations`, organisationsRoutes);
 app.use(`${apiBase}/auth`, authRoutes);
 app.use(`${apiBase}/email`, emailRoutes);
+app.use(`${apiBase}/upload`, uploadRoutes);
 
 // Test SMTP connection on startup (non-blocking)
 async function testEmailOnStartup() {

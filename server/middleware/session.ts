@@ -21,5 +21,6 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
   const session = await getSessionFromRequest(req)
   if (!session) return res.status(401).json({ error: 'Not authenticated' })
   ;(req as any).session = session
+  ;(req as any).user = session.user
   next()
 }
