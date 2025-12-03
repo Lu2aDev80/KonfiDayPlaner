@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LogIn, Building2, ArrowRight, Users } from "lucide-react";
 import FlipchartBackground from "../components/layout/FlipchartBackground";
+import { ConfirmModal, AlertModal, Modal } from "../components/ui";
 import styles from "./Admin.module.css";
 import chaosOpsLogo from "../assets/Chaos-Ops Logo.png";
 import loginGremlin from "../assets/gremlins/login.png";
@@ -27,6 +28,19 @@ const AdminLogin: React.FC = () => {
     loading: boolean;
     lastCheck: string | null;
   }>({ api: false, db: false, loading: true, lastCheck: null });
+  
+  // Modal states
+  const [modalState, setModalState] = useState<{
+    type: 'none' | 'confirm-resend' | 'alert' | 'resend-email';
+    title: string;
+    message: string;
+    alertType?: 'info' | 'success' | 'warning' | 'error';
+    userEmail?: string;
+  }>({
+    type: 'none',
+    title: '',
+    message: '',
+  });
 
   useEffect(() => {
     const load = async () => {
@@ -105,38 +119,66 @@ const AdminLogin: React.FC = () => {
       navigate(`/admin/dashboard?org=${selectedOrgId}`, { replace: true });
     } catch (err: any) {
       const errorMessage = err.message || "Login fehlgeschlagen";
+      const errorData = err.data || {};
 
       // Check if it's an email verification error
       if (errorMessage.includes("Email not verified")) {
-        if (
-          confirm(
-            "Deine E-Mail-Adresse ist noch nicht bestätigt. Möchtest du eine neue Bestätigungs-E-Mail erhalten?"
-          )
-        ) {
-          try {
-            // Extract user email from the error context if available
-            // For now, we'll ask the user to enter their email
-            const email = credentials.username.includes("@")
-              ? credentials.username
-              : prompt("Bitte gib deine E-Mail-Adresse ein:");
-
-            if (email) {
-              await api.resendVerification(email, selectedOrgId);
-              alert(
-                "Eine neue Bestätigungs-E-Mail wurde gesendet! Bitte überprüfe dein Postfach."
-              );
-            }
-          } catch (resendError: any) {
-            alert(
-              "Fehler beim Senden der Bestätigungs-E-Mail: " +
-                (resendError.message || "Unbekannter Fehler")
-            );
-          }
-        }
+        // Use email from error response, or fallback to entered username if it's an email
+        const emailToUse = errorData.email || 
+                          (credentials.username.includes("@") ? credentials.username : null);
+        
+        setModalState({
+          type: 'confirm-resend',
+          title: 'E-Mail nicht bestätigt',
+          message: 'Deine E-Mail-Adresse ist noch nicht bestätigt. Möchtest du eine neue Bestätigungs-E-Mail erhalten?',
+          alertType: 'warning',
+          userEmail: emailToUse || undefined,
+        });
       } else {
-        alert(errorMessage);
+        setModalState({
+          type: 'alert',
+          title: 'Login fehlgeschlagen',
+          message: errorMessage,
+          alertType: 'error',
+        });
       }
     }
+  };
+
+  const handleResendVerification = async (email?: string) => {
+    if (!selectedOrgId) return;
+    
+    // If no email provided, show input modal
+    if (!email) {
+      setModalState({
+        type: 'resend-email',
+        title: 'E-Mail-Adresse eingeben',
+        message: 'Bitte gib deine E-Mail-Adresse ein, um eine neue Bestätigungs-E-Mail zu erhalten.',
+        alertType: 'info',
+      });
+      return;
+    }
+
+    try {
+      await api.resendVerification(email, selectedOrgId);
+      setModalState({
+        type: 'alert',
+        title: 'E-Mail gesendet',
+        message: 'Eine neue Bestätigungs-E-Mail wurde gesendet! Bitte überprüfe dein Postfach (auch den Spam-Ordner).',
+        alertType: 'success',
+      });
+    } catch (resendError: any) {
+      setModalState({
+        type: 'alert',
+        title: 'Fehler',
+        message: 'Fehler beim Senden der Bestätigungs-E-Mail: ' + (resendError.message || 'Unbekannter Fehler'),
+        alertType: 'error',
+      });
+    }
+  };
+
+  const closeModal = () => {
+    setModalState({ type: 'none', title: '', message: '' });
   };
 
   const cardStyle = {
@@ -727,6 +769,107 @@ const AdminLogin: React.FC = () => {
             }}
           />
         </div>
+
+        {/* Modals */}
+        <ConfirmModal
+          isOpen={modalState.type === 'confirm-resend'}
+          onClose={closeModal}
+          onConfirm={() => handleResendVerification(modalState.userEmail)}
+          title={modalState.title}
+          message={modalState.message}
+          type={modalState.alertType}
+          confirmText="E-Mail senden"
+          cancelText="Abbrechen"
+        />
+
+        <AlertModal
+          isOpen={modalState.type === 'alert'}
+          onClose={closeModal}
+          title={modalState.title}
+          message={modalState.message}
+          type={modalState.alertType}
+        />
+
+        <Modal
+          isOpen={modalState.type === 'resend-email'}
+          onClose={closeModal}
+          title={modalState.title}
+          type="info"
+        >
+          <p style={{
+            fontFamily: '"Inter", "Roboto", Arial, sans-serif',
+            fontSize: '1rem',
+            color: '#475569',
+            lineHeight: '1.6',
+            marginBottom: '1rem',
+          }}>
+            {modalState.message}
+          </p>
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            const email = (e.currentTarget.elements.namedItem('email') as HTMLInputElement).value;
+            if (email) {
+              closeModal();
+              handleResendVerification(email);
+            }
+          }}>
+            <input
+              type="email"
+              name="email"
+              required
+              placeholder="deine-email@beispiel.de"
+              style={{
+                width: '100%',
+                padding: '0.75rem',
+                border: '2px solid #374151',
+                borderRadius: '8px',
+                fontSize: '1rem',
+                fontFamily: '"Inter", "Roboto", Arial, sans-serif',
+                marginBottom: '1rem',
+                boxSizing: 'border-box',
+              }}
+            />
+            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+              <button
+                type="button"
+                onClick={closeModal}
+                style={{
+                  padding: '0.75rem 1.5rem',
+                  border: '2px solid #64748b',
+                  borderRadius: '8px',
+                  fontSize: '1rem',
+                  fontWeight: '600',
+                  fontFamily: '"Inter", "Roboto", Arial, sans-serif',
+                  backgroundColor: '#fff',
+                  color: '#64748b',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  boxShadow: '2px 4px 0 #64748b',
+                }}
+              >
+                Abbrechen
+              </button>
+              <button
+                type="submit"
+                style={{
+                  padding: '0.75rem 1.5rem',
+                  border: '2px solid #181818',
+                  borderRadius: '8px',
+                  fontSize: '1rem',
+                  fontWeight: '600',
+                  fontFamily: '"Inter", "Roboto", Arial, sans-serif',
+                  backgroundColor: '#fbbf24',
+                  color: '#fff',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  boxShadow: '2px 4px 0 #181818',
+                }}
+              >
+                Senden
+              </button>
+            </div>
+          </form>
+        </Modal>
       </main>
     </div>
   );

@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Mail, CheckCircle } from "lucide-react";
 import FlipchartBackground from "../components/layout/FlipchartBackground";
+import { AlertModal } from "../components/ui";
 import styles from "./Admin.module.css";
 import { api } from "../lib/api";
 
@@ -21,6 +22,12 @@ const AdminSignup: React.FC = () => {
     user: any;
     message: string;
   } | null>(null);
+  const [modalState, setModalState] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    type: 'info' | 'success' | 'warning' | 'error';
+  }>({ isOpen: false, title: '', message: '', type: 'info' });
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,7 +37,12 @@ const AdminSignup: React.FC = () => {
       !form.adminEmail ||
       !form.password
     ) {
-      alert("Bitte fülle alle Pflichtfelder aus!");
+      setModalState({
+        isOpen: true,
+        title: 'Fehlende Angaben',
+        message: 'Bitte fülle alle Pflichtfelder aus!',
+        type: 'warning',
+      });
       return;
     }
 
@@ -40,7 +52,12 @@ const AdminSignup: React.FC = () => {
       setSignupResult(data);
       setSignupSuccess(true);
     } catch (err: any) {
-      alert(err.message || "Registrierung fehlgeschlagen");
+      setModalState({
+        isOpen: true,
+        title: 'Registrierung fehlgeschlagen',
+        message: err.message || 'Ein unbekannter Fehler ist aufgetreten.',
+        type: 'error',
+      });
     } finally {
       setSubmitting(false);
     }
@@ -393,6 +410,15 @@ const AdminSignup: React.FC = () => {
           </form>
         </div>
       </main>
+
+      {/* Alert Modal */}
+      <AlertModal
+        isOpen={modalState.isOpen}
+        onClose={() => setModalState({ ...modalState, isOpen: false })}
+        title={modalState.title}
+        message={modalState.message}
+        type={modalState.type}
+      />
     </div>
   );
 };

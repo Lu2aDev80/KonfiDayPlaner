@@ -15,6 +15,7 @@ import EventForm from "../components/forms/EventForm";
 import DayPlanForm from "../components/forms/DayPlanForm";
 import ScheduleManager from "../components/planner/ScheduleManager";
 import FlipchartBackground from "../components/layout/FlipchartBackground";
+import { ConfirmModal } from "../components/ui";
 import type { Event, DayPlan } from "../types/event";
 import type { ScheduleItem } from "../types/schedule";
 import styles from "./Admin.module.css";
@@ -40,6 +41,11 @@ const Dashboard: React.FC = () => {
   const [managingSchedule, setManagingSchedule] = useState<DayPlan | null>(
     null
   );
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    isOpen: boolean;
+    type: 'event' | 'dayPlan';
+    id: string;
+  }>({ isOpen: false, type: 'event', id: '' });
 
   // Get organization info
   const [organisationName, setOrganisationName] = useState<string | null>(null);
@@ -117,16 +123,16 @@ const Dashboard: React.FC = () => {
   };
 
   const handleDeleteEvent = (eventId: string) => {
-    if (
-      confirm(
-        "Möchten Sie diese Veranstaltung wirklich löschen? Alle Tagespläne werden ebenfalls gelöscht."
-      )
-    ) {
-      saveEvents(events.filter((e) => e.id !== eventId));
-      if (selectedEvent?.id === eventId) {
-        setSelectedEvent(null);
-      }
+    setDeleteConfirm({ isOpen: true, type: 'event', id: eventId });
+  };
+
+  const confirmDeleteEvent = () => {
+    const eventId = deleteConfirm.id;
+    saveEvents(events.filter((e) => e.id !== eventId));
+    if (selectedEvent?.id === eventId) {
+      setSelectedEvent(null);
     }
+    setDeleteConfirm({ isOpen: false, type: 'event', id: '' });
   };
 
   // DayPlan CRUD operations
@@ -182,22 +188,26 @@ const Dashboard: React.FC = () => {
 
   const handleDeleteDayPlan = (dayPlanId: string) => {
     if (!selectedEvent) return;
+    setDeleteConfirm({ isOpen: true, type: 'dayPlan', id: dayPlanId });
+  };
 
-    if (confirm("Möchten Sie diesen Tagesplan wirklich löschen?")) {
-      const updatedEvents = events.map((e) =>
-        e.id === selectedEvent.id
-          ? {
-              ...e,
-              dayPlans: e.dayPlans.filter((d) => d.id !== dayPlanId),
-              updatedAt: new Date(),
-            }
-          : e
-      );
-      saveEvents(updatedEvents);
-      setSelectedEvent(
-        updatedEvents.find((e) => e.id === selectedEvent.id) || null
-      );
-    }
+  const confirmDeleteDayPlan = () => {
+    if (!selectedEvent) return;
+    const dayPlanId = deleteConfirm.id;
+    const updatedEvents = events.map((e) =>
+      e.id === selectedEvent.id
+        ? {
+            ...e,
+            dayPlans: e.dayPlans.filter((d) => d.id !== dayPlanId),
+            updatedAt: new Date(),
+          }
+        : e
+    );
+    saveEvents(updatedEvents);
+    setSelectedEvent(
+      updatedEvents.find((e) => e.id === selectedEvent.id) || null
+    );
+    setDeleteConfirm({ isOpen: false, type: 'dayPlan', id: '' });
   };
 
   const handleLogout = async () => {
@@ -1017,6 +1027,29 @@ const Dashboard: React.FC = () => {
           )}
         </div>
       </main>
+
+      {/* Delete Confirmation Modals */}
+      <ConfirmModal
+        isOpen={deleteConfirm.isOpen && deleteConfirm.type === 'event'}
+        onClose={() => setDeleteConfirm({ isOpen: false, type: 'event', id: '' })}
+        onConfirm={confirmDeleteEvent}
+        title="Veranstaltung löschen"
+        message="Möchten Sie diese Veranstaltung wirklich löschen? Alle Tagespläne werden ebenfalls gelöscht."
+        confirmText="Löschen"
+        cancelText="Abbrechen"
+        type="error"
+      />
+
+      <ConfirmModal
+        isOpen={deleteConfirm.isOpen && deleteConfirm.type === 'dayPlan'}
+        onClose={() => setDeleteConfirm({ isOpen: false, type: 'dayPlan', id: '' })}
+        onConfirm={confirmDeleteDayPlan}
+        title="Tagesplan löschen"
+        message="Möchten Sie diesen Tagesplan wirklich löschen?"
+        confirmText="Löschen"
+        cancelText="Abbrechen"
+        type="error"
+      />
     </div>
   );
 };

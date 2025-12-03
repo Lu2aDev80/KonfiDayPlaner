@@ -198,6 +198,7 @@ router.post("/login", async (req, res) => {
         message: "Please verify your email address before logging in.",
         canResendVerification: true,
         userId: user.id,
+        email: user.email, // Include email so frontend can use it for resend
       });
     }
 

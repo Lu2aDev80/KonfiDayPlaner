@@ -36,7 +36,11 @@ async function json<T>(input: RequestInfo, init?: RequestInit): Promise<T> {
     try {
       err = await res.json();
     } catch {}
-    throw new Error(err?.error || res.statusText);
+    
+    // Create error with full error response data for special cases (like email verification)
+    const error: any = new Error(err?.error || res.statusText);
+    error.data = err; // Include full error response data
+    throw error;
   }
   return res.json();
 }
