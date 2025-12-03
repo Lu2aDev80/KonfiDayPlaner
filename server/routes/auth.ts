@@ -24,7 +24,11 @@ async function sendVerificationEmailSafe(
 
   try {
     const basePath = process.env.APP_BASE_PATH || '';
-    const frontendHost = process.env.FRONTEND_HOST || `${req.protocol}://${req.get("host")}`;
+    // In production, use FRONTEND_HOST; in dev, try to construct from request
+    const frontendHost = process.env.FRONTEND_HOST || 
+                         (process.env.NODE_ENV === 'production' 
+                           ? 'https://lu2adevelopment.de' 
+                           : `${req.protocol}://${req.get("host")}`);
     const verificationLink = `${frontendHost}${basePath}/verify-email?token=${token}`;
     const emailHtml = renderVerificationEmail(username, orgName, verificationLink);
     
