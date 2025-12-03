@@ -10,6 +10,9 @@ import { testConnection, isEmailEnabled } from "./mailer";
 
 const app = express();
 const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
+// Optional base path for running behind reverse proxies (e.g., /minihackathon)
+const BASE_PATH = (process.env.APP_BASE_PATH || '').trim();
+const apiBase = `${BASE_PATH}/api`;
 
 app.use(express.json());
 app.use(cookieParser());
@@ -56,21 +59,22 @@ app.use(cors({
 }));
 
 // Health
-app.get("/api/health", (_req: Request, res: Response) => {
+app.get(`${apiBase}/health`, (_req: Request, res: Response) => {
   logger.info("Health check requested");
   res.json({ 
     ok: true, 
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV,
     allowedOrigins: allowedOrigins,
-    emailEnabled: isEmailEnabled()
+    emailEnabled: isEmailEnabled(),
+    basePath: BASE_PATH || '/'
   });
 });
 
 // Routes
-app.use("/api/organisations", organisationsRoutes);
-app.use("/api/auth", authRoutes);
-app.use("/api/email", emailRoutes);
+app.use(`${apiBase}/organisations`, organisationsRoutes);
+app.use(`${apiBase}/auth`, authRoutes);
+app.use(`${apiBase}/email`, emailRoutes);
 
 // Test SMTP connection on startup (non-blocking)
 async function testEmailOnStartup() {
