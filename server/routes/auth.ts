@@ -167,6 +167,8 @@ router.post("/signup", async (req, res) => {
     logger.error("signup error", err);
     res.status(500).json({ error: "Internal error" });
   }
+});
+
 router.post("/login", async (req, res) => {
   const { organisationId, usernameOrEmail, password } = req.body ?? {};
   if (!organisationId || !usernameOrEmail || !password) {
