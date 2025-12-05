@@ -1,7 +1,7 @@
 
 import { Routes, Route } from 'react-router-dom';
 import Home from "./pages/Home";
-import DisplayRegister from "./pages/DisplayRegister";
+import DevicePairingDisplay from "./pages/DevicePairingDisplay";
 import PlannerPage from "./pages/PlannerPage";
 import Admin from "./pages/Admin";
 import AdminLogin from "./pages/AdminLogin";
@@ -16,6 +16,7 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
+      <Route path="/device-pairing" element={<DevicePairingDisplay />} />
       <Route path="/documentation" element={<Documentation />} />
       <Route path="/login" element={<AdminLogin />} />
       <Route path="/signup" element={<AdminSignup />} />
@@ -24,7 +25,6 @@ function App() {
       <Route path="/admin" element={<Admin />} />
       <Route path="/admin/dashboard" element={<Dashboard />} />
       <Route path="/admin/settings" element={<OrganisationSettings />} />
-      <Route path="/register-display" element={<DisplayRegister />} />
       <Route path="/planner" element={<PlannerPage />} />
     </Routes>
   );

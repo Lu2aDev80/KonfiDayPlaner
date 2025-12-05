@@ -28,19 +28,25 @@
   "dependencies": {
     "@prisma/client": "^6.1.0",
     "@types/multer": "^2.0.0",
+    "@types/socket.io": "^3.0.1",
+    "@types/socket.io-client": "^1.4.36",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dayjs": "^1.11.13",
     "dotenv": "^17.2.3",
     "express": "^4.21.1",
+    "html5-qrcode": "^2.3.8",
     "lucide-react": "^0.555.0",
     "mjml": "^4.17.1",
     "multer": "^2.0.2",
     "nodemailer": "^6.9.16",
+    "qrcode.react": "^4.2.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "react-router-dom": "^7.9.6"
+    "react-router-dom": "^7.9.6",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

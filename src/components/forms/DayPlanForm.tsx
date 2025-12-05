@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Save, X, Calendar, Plus, Trash2 } from 'lucide-react';
+import { X, Calendar, ChevronRight } from 'lucide-react';
+import ScheduleManager from '../planner/ScheduleManager';
 import type { DayPlan, Event } from '../../types/event';
 import type { ScheduleItem } from '../../types/schedule';
 import styles from '../../pages/Admin.module.css';
@@ -17,296 +18,257 @@ const DayPlanForm: React.FC<DayPlanFormProps> = ({
   onSave,
   onCancel
 }) => {
+  const [step, setStep] = useState<'basic' | 'schedule'>('basic');
   const [name, setName] = useState(dayPlan?.name || '');
   const [date, setDate] = useState(dayPlan?.date || new Date().toISOString().split('T')[0]);
-  const [schedule, setSchedule] = useState<ScheduleItem[]>(dayPlan?.schedule || []);
+  const [schedule] = useState<ScheduleItem[]>(dayPlan?.schedule || []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleBasicSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (name.trim() && date) {
+      setStep('schedule');
+    }
+  };
+
+  const handleScheduleSave = (savedSchedule: ScheduleItem[]) => {
     onSave({
       eventId: event.id,
       name: name.trim(),
       date,
-      schedule
+      schedule: savedSchedule
     });
   };
 
-  const addScheduleItem = () => {
-    const newItem: ScheduleItem = {
-      id: Date.now(),
-      time: '09:00',
-      type: 'session',
-      title: 'Neuer Termin'
-    };
-    setSchedule([...schedule, newItem]);
+  const handleScheduleCancel = () => {
+    setStep('basic');
   };
 
-  const updateScheduleItem = (index: number, updates: Partial<ScheduleItem>) => {
-    const newSchedule = [...schedule];
-    newSchedule[index] = { ...newSchedule[index], ...updates };
-    setSchedule(newSchedule);
-  };
-
-  const removeScheduleItem = (index: number) => {
-    setSchedule(schedule.filter((_, i) => i !== index));
-  };
-
-  const isValid = name.trim().length > 0 && date;
+  const isBasicValid = name.trim().length > 0 && date;
 
   return (
     <div style={{ 
       width: '100%', 
-      maxWidth: '600px',
+      maxWidth: '800px',
       margin: '0 1rem'
     }}>
-      <div className={styles.adminCard} style={{ width: '100%' }}>
-        <div className={styles.tape} aria-hidden="true"></div>
-        
-        <h2 className={styles.cardTitle}>
-          <Calendar size={20} style={{ marginRight: '0.5rem', verticalAlign: 'middle' }} />
-          {dayPlan ? 'Tagesplan bearbeiten' : 'Neuer Tagesplan'}
-        </h2>
+      {step === 'basic' ? (
+        // Step 1: Basic Information
+        <div className={styles.adminCard} style={{ width: '100%' }}>
+          <div className={styles.tape} aria-hidden="true"></div>
+          
+          <h2 className={styles.cardTitle}>
+            <Calendar size={20} style={{ marginRight: '0.5rem', verticalAlign: 'middle' }} />
+            {dayPlan ? 'Tagesplan bearbeiten' : 'Neuer Tagesplan'}
+          </h2>
 
-        <form onSubmit={handleSubmit} className={styles.cardContent}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            
-            {/* Name Field */}
-            <div>
-              <label htmlFor="dayPlanName" style={{ 
-                display: 'block', 
-                marginBottom: '0.5rem', 
-                fontFamily: '"Gloria Hallelujah", "Caveat", "Comic Neue", cursive, sans-serif',
-                fontSize: '1rem',
-                fontWeight: '600',
-                color: '#181818'
+          <form onSubmit={handleBasicSubmit} className={styles.cardContent}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              
+              {/* Event Info */}
+              <div style={{
+                padding: '1rem',
+                backgroundColor: '#f0f9ff',
+                border: '2px solid #0ea5e9',
+                borderRadius: '8px',
+                fontFamily: '"Inter", "Roboto", Arial, sans-serif'
               }}>
-                Name des Tagesplans *
-              </label>
-              <input
-                type="text"
-                id="dayPlanName"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                placeholder="z.B. Tag 1 - Ankunft"
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: '2px solid #181818',
-                  borderRadius: '8px',
-                  fontSize: '1rem',
-                  fontFamily: '"Inter", "Roboto", Arial, sans-serif',
-                  backgroundColor: '#fff',
-                  boxSizing: 'border-box'
-                }}
-              />
-            </div>
+                <div style={{ 
+                  fontSize: '0.75rem', 
+                  fontWeight: '600', 
+                  color: '#0369a1',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  marginBottom: '0.5rem'
+                }}>
+                  Veranstaltung
+                </div>
+                <div style={{
+                  fontSize: '1.1rem',
+                  fontWeight: '600',
+                  color: '#0369a1',
+                  fontFamily: '"Gloria Hallelujah", "Caveat", "Comic Neue", cursive, sans-serif'
+                }}>
+                  {event.name}
+                </div>
+              </div>
 
-            {/* Date Field */}
-            <div>
-              <label htmlFor="dayPlanDate" style={{ 
-                display: 'block', 
-                marginBottom: '0.5rem', 
-                fontFamily: '"Gloria Hallelujah", "Caveat", "Comic Neue", cursive, sans-serif',
-                fontSize: '1rem',
-                fontWeight: '600',
-                color: '#181818'
-              }}>
-                Datum *
-              </label>
-              <input
-                type="date"
-                id="dayPlanDate"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                required
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  border: '2px solid #181818',
-                  borderRadius: '8px',
-                  fontSize: '1rem',
-                  fontFamily: '"Inter", "Roboto", Arial, sans-serif',
-                  backgroundColor: '#fff',
-                  boxSizing: 'border-box'
-                }}
-              />
-            </div>
-
-            {/* Schedule Items */}
-            <div>
-              <div style={{ 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center',
-                marginBottom: '0.75rem'
-              }}>
-                <label style={{ 
+              {/* Name Field */}
+              <div>
+                <label htmlFor="dayPlanName" style={{ 
+                  display: 'block', 
+                  marginBottom: '0.5rem', 
                   fontFamily: '"Gloria Hallelujah", "Caveat", "Comic Neue", cursive, sans-serif',
                   fontSize: '1rem',
                   fontWeight: '600',
                   color: '#181818'
                 }}>
-                  Termine ({schedule.length})
+                  Name des Tagesplans *
                 </label>
+                <input
+                  type="text"
+                  id="dayPlanName"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  autoFocus
+                  placeholder="z.B. Tag 1 - Ankunft & Kennenlernen"
+                  style={{
+                    width: '100%',
+                    padding: '0.875rem',
+                    border: '2px solid #181818',
+                    borderRadius: '8px',
+                    fontSize: '1rem',
+                    fontFamily: '"Inter", "Roboto", Arial, sans-serif',
+                    backgroundColor: '#fff',
+                    boxSizing: 'border-box',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onFocus={(e) => {
+                    e.currentTarget.style.boxShadow = '0 0 0 3px #fef3c7';
+                  }}
+                  onBlur={(e) => {
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}
+                />
+              </div>
+
+              {/* Date Field */}
+              <div>
+                <label htmlFor="dayPlanDate" style={{ 
+                  display: 'block', 
+                  marginBottom: '0.5rem', 
+                  fontFamily: '"Gloria Hallelujah", "Caveat", "Comic Neue", cursive, sans-serif',
+                  fontSize: '1rem',
+                  fontWeight: '600',
+                  color: '#181818'
+                }}>
+                  Datum *
+                </label>
+                <input
+                  type="date"
+                  id="dayPlanDate"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  required
+                  style={{
+                    width: '100%',
+                    padding: '0.875rem',
+                    border: '2px solid #181818',
+                    borderRadius: '8px',
+                    fontSize: '1rem',
+                    fontFamily: '"Inter", "Roboto", Arial, sans-serif',
+                    backgroundColor: '#fff',
+                    boxSizing: 'border-box',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onFocus={(e) => {
+                    e.currentTarget.style.boxShadow = '0 0 0 3px #fef3c7';
+                  }}
+                  onBlur={(e) => {
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}
+                />
+              </div>
+
+              {/* Info Box */}
+              <div style={{
+                padding: '1rem',
+                backgroundColor: '#f3f4f6',
+                border: '2px solid #d1d5db',
+                borderRadius: '8px',
+                fontFamily: '"Inter", "Roboto", Arial, sans-serif',
+                fontSize: '0.9rem',
+                color: '#475569'
+              }}>
+                <div style={{ fontWeight: '600', marginBottom: '0.5rem' }}>💡 Nächster Schritt:</div>
+                <div>Nachdem du die Grunddaten eingegeben hast, kannst du die Termine für diesen Tag hinzufügen.</div>
+              </div>
+
+              {/* Action Buttons */}
+              <div style={{ display: 'flex', gap: '0.75rem' }}>
+                <button
+                  type="submit"
+                  disabled={!isBasicValid}
+                  style={{
+                    flex: '1',
+                    padding: '1rem',
+                    border: '2px solid #181818',
+                    borderRadius: '8px',
+                    fontSize: '1rem',
+                    fontWeight: '700',
+                    fontFamily: '"Inter", "Roboto", Arial, sans-serif',
+                    backgroundColor: isBasicValid ? '#10b981' : '#e5e7eb',
+                    color: isBasicValid ? '#fff' : '#888',
+                    cursor: isBasicValid ? 'pointer' : 'not-allowed',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.5rem',
+                    transition: 'all 0.2s ease',
+                    boxShadow: isBasicValid ? '2px 4px 0 #181818' : 'none'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (isBasicValid) {
+                      e.currentTarget.style.backgroundColor = '#059669';
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                      e.currentTarget.style.boxShadow = '3px 6px 0 #181818';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (isBasicValid) {
+                      e.currentTarget.style.backgroundColor = '#10b981';
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '2px 4px 0 #181818';
+                    }
+                  }}
+                >
+                  <ChevronRight size={20} />
+                  Termine hinzufügen
+                </button>
+
                 <button
                   type="button"
-                  onClick={addScheduleItem}
+                  onClick={onCancel}
                   style={{
-                    padding: '0.5rem',
-                    border: '2px solid #181818',
-                    borderRadius: '6px',
-                    fontSize: '0.85rem',
+                    padding: '1rem 1.5rem',
+                    border: '2px solid #64748b',
+                    borderRadius: '8px',
+                    fontSize: '1rem',
                     fontWeight: '600',
                     fontFamily: '"Inter", "Roboto", Arial, sans-serif',
-                    backgroundColor: '#d9fdd2',
-                    color: '#181818',
+                    backgroundColor: '#fff',
+                    color: '#64748b',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '0.25rem'
+                    justifyContent: 'center',
+                    gap: '0.5rem',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#f1f5f9';
+                    e.currentTarget.style.transform = 'translateY(-1px)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#fff';
+                    e.currentTarget.style.transform = 'translateY(0)';
                   }}
                 >
-                  <Plus size={14} />
-                  Termin
+                  <X size={20} />
+                  Abbrechen
                 </button>
               </div>
-
-              <div style={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                gap: '0.5rem', 
-                maxHeight: window.innerWidth < 768 ? '200px' : '300px', 
-                overflowY: 'auto'
-              }}>
-                {schedule.map((item, index) => (
-                  <div key={index} style={{
-                    padding: '0.75rem',
-                    border: '1px solid #e5e7eb',
-                    borderRadius: '6px',
-                    backgroundColor: '#f9fafb',
-                    display: 'flex',
-                    gap: '0.5rem',
-                    alignItems: 'center',
-                    flexWrap: window.innerWidth < 640 ? 'wrap' : 'nowrap'
-                  }}>
-                    <input
-                      type="time"
-                      value={item.time}
-                      onChange={(e) => updateScheduleItem(index, { time: e.target.value })}
-                      style={{
-                        width: '80px',
-                        padding: '0.25rem',
-                        border: '1px solid #d1d5db',
-                        borderRadius: '4px',
-                        fontSize: '0.85rem'
-                      }}
-                    />
-                    <input
-                      type="text"
-                      value={item.title}
-                      onChange={(e) => updateScheduleItem(index, { title: e.target.value })}
-                      placeholder="Titel"
-                      style={{
-                        flex: '1',
-                        padding: '0.25rem',
-                        border: '1px solid #d1d5db',
-                        borderRadius: '4px',
-                        fontSize: '0.85rem'
-                      }}
-                    />
-                    <select
-                      value={item.type}
-                      onChange={(e) => updateScheduleItem(index, { type: e.target.value as any })}
-                      style={{
-                        width: '100px',
-                        padding: '0.25rem',
-                        border: '1px solid #d1d5db',
-                        borderRadius: '4px',
-                        fontSize: '0.85rem'
-                      }}
-                    >
-                      <option value="session">Session</option>
-                      <option value="workshop">Workshop</option>
-                      <option value="break">Pause</option>
-                      <option value="game">Spiel</option>
-                      <option value="announcement">Ansage</option>
-                      <option value="transition">Übergang</option>
-                    </select>
-                    <button
-                      type="button"
-                      onClick={() => removeScheduleItem(index)}
-                      style={{
-                        padding: '0.25rem',
-                        border: 'none',
-                        backgroundColor: 'transparent',
-                        color: '#dc2626',
-                        cursor: 'pointer',
-                        borderRadius: '4px'
-                      }}
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-                ))}
-              </div>
             </div>
-
-            {/* Action Buttons */}
-            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
-              <button
-                type="submit"
-                disabled={!isValid}
-                style={{
-                  flex: '1',
-                  padding: '0.875rem',
-                  border: '2px solid #181818',
-                  borderRadius: '8px',
-                  fontSize: '1rem',
-                  fontWeight: '700',
-                  fontFamily: '"Inter", "Roboto", Arial, sans-serif',
-                  backgroundColor: isValid ? '#fbbf24' : '#e5e7eb',
-                  color: isValid ? '#fff' : '#888',
-                  cursor: isValid ? 'pointer' : 'not-allowed',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.5rem',
-                  transition: 'all 0.2s ease',
-                  boxShadow: isValid ? '2px 4px 0 #181818' : 'none'
-                }}
-              >
-                <Save size={16} />
-                {dayPlan ? 'Aktualisieren' : 'Erstellen'}
-              </button>
-
-              <button
-                type="button"
-                onClick={onCancel}
-                style={{
-                  padding: '0.875rem 1rem',
-                  border: '2px solid #64748b',
-                  borderRadius: '8px',
-                  fontSize: '1rem',
-                  fontWeight: '600',
-                  fontFamily: '"Inter", "Roboto", Arial, sans-serif',
-                  backgroundColor: '#fff',
-                  color: '#64748b',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.5rem',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                <X size={16} />
-                Abbrechen
-              </button>
-            </div>
-          </div>
-        </form>
-      </div>
+          </form>
+        </div>
+      ) : (
+        // Step 2: Schedule Management
+        <ScheduleManager
+          schedule={schedule}
+          onSave={handleScheduleSave}
+          onCancel={handleScheduleCancel}
+        />
+      )}
     </div>
   );
 };

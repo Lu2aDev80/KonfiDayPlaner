@@ -21,6 +21,9 @@ model Organisation {
   events      Event[]
   users       User[]
   invitations Invitation[]
+  eventTags   EventTag[]
+  scheduleItemTags ScheduleItemTag[]
+  displays    Display[]
 
   @@map("organisations")
 }
@@ -35,6 +38,7 @@ model Event {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   dayPlans       DayPlan[]
+  tags           EventTag[] @relation("EventToEventTag")
 
   @@map("events")
 }
@@ -77,6 +81,7 @@ model ScheduleItem {
   position         Int      @default(0)
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
+  tags             ScheduleItemTag[] @relation("ScheduleItemToScheduleItemTag")
 
   @@map("schedule_items")
   @@index([dayPlanId, position])
@@ -155,4 +160,71 @@ model Invitation {
 
   @@unique([organisationId, email])
   @@map("invitations")
+}
+
+// EventTag model for event categorization
+model EventTag {
+  id             String   @id @default(uuid())
+  name           String
+  color          String   @default("#64748b") // Hex color for visual distinction
+  organisationId String
+  organisation   Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+  events         Event[]  @relation("EventToEventTag")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([organisationId, name])
+  @@map("event_tags")
+}
+
+// ScheduleItemTag model for schedule item categorization
+model ScheduleItemTag {
+  id             String   @id @default(uuid())
+  name           String
+  color          String   @default("#64748b") // Hex color for visual distinction
+  organisationId String
+  organisation   Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+  scheduleItems  ScheduleItem[] @relation("ScheduleItemToScheduleItemTag")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([organisationId, name])
+  @@map("schedule_item_tags")
+}
+
+// Display model for registered display screens
+model Display {
+  id               String   @id @default(uuid())
+  organisationId   String
+  organisation     Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+  name             String   // User-friendly name for the display
+  registrationCode String?  @unique // Temporary code for registration
+  codeExpiresAt    DateTime? // Expiration for registration code
+  isActive         Boolean  @default(true)
+  currentDayPlanId String?  // Currently assigned day plan
+  lastSeenAt       DateTime @default(now()) // For monitoring
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("displays")
+}
+
+// Device model for device pairing (display registration)
+model Device {
+  id           String       @id @default(cuid())
+  pairingCode  String       @unique // 6-digit pairing code
+  socketId     String       // Socket.io connection ID
+  status       DeviceStatus @default(PENDING)
+  orgId        String?      // Set after pairing
+  name         String?      // Optional device name
+  dayPlanId    String?      // Assigned DayPlan for display
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@map("devices")
+}
+
+enum DeviceStatus {
+  PENDING
+  PAIRED
 }

@@ -6,7 +6,6 @@ import {
   Users,
   UserPlus,
   UserMinus,
-  Monitor,
   Save,
   ArrowLeft,
   Mail,
@@ -15,6 +14,7 @@ import {
 } from 'lucide-react';
 import FlipchartBackground from '../components/layout/FlipchartBackground';
 import { ConfirmModal } from '../components/ui';
+import TagManager from '../components/admin/TagManager';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../lib/api';
 import styles from './Admin.module.css';
@@ -812,38 +812,30 @@ const OrganisationSettings: React.FC = () => {
         </div>
         )}
 
-        {/* Manage Screens Section - Placeholder - Only for Admins */}
-        {isAdmin && (
-        <div style={cardStyle}>
-          <h2
-            style={{
-              fontFamily: '"Gloria Hallelujah", "Caveat", cursive',
-              fontSize: '1.5rem',
-              fontWeight: '700',
-              color: '#0f172a',
-              marginBottom: '1.5rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-            }}
-          >
-            <Monitor size={24} />
-            Bildschirm-Verwaltung
-          </h2>
-          <div
-            style={{
-              padding: '2rem',
-              textAlign: 'center',
-              border: '2px dashed #cbd5e1',
-              borderRadius: '12px',
-              color: '#64748b',
-              fontFamily: '"Inter", "Roboto", Arial, sans-serif',
-            }}
-          >
-            Bildschirm-Verwaltung kommt bald! Hier kannst du Display-Screens für deine Organisation verwalten.
+        {/* Tag Management - Event Tags */}
+        {isAdmin && orgId && (
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '2rem' }}>
+            <TagManager
+              orgId={orgId}
+              type="event"
+              title="Veranstaltungs-Tags"
+              description="Erstelle Tags um Veranstaltungen zu kategorisieren und zu filtern."
+            />
           </div>
-        </div>
         )}
+
+        {/* Tag Management - Schedule Item Tags */}
+        {isAdmin && orgId && (
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '2rem' }}>
+            <TagManager
+              orgId={orgId}
+              type="scheduleItem"
+              title="Termin-Tags"
+              description="Erstelle Tags um Termine in Tagesplänen zu kategorisieren und zu filtern."
+            />
+          </div>
+        )}
+
         
         {/* Message for non-admin users */}
         {!isAdmin && (
@@ -872,7 +864,6 @@ const OrganisationSettings: React.FC = () => {
         )}
       </main>
 
-      {/* Delete Confirmation Modal - Only show for admins */}
       {isAdmin && (
       <ConfirmModal
         isOpen={deleteConfirm.isOpen}

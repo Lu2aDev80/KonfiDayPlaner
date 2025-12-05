@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import {
   Calendar,
@@ -11,6 +11,13 @@ import {
   Eye,
   Clock,
   Settings,
+  Search,
+  X,
+  List,
+  Grid,
+  ChevronDown,
+  ChevronRight,
+  Filter,
 } from "lucide-react";
 import EventForm from "../components/forms/EventForm";
 import DayPlanForm from "../components/forms/DayPlanForm";
@@ -50,6 +57,16 @@ const Dashboard: React.FC = () => {
     id: string;
   }>({ isOpen: false, type: 'event', id: '' });
 
+  // UI state for improved overview
+  const [searchQuery, setSearchQuery] = useState('');
+  const [viewMode, setViewMode] = useState<'detailed' | 'compact'>('detailed');
+  const [collapsedEvents, setCollapsedEvents] = useState<Set<string>>(new Set());
+  const [showTagFilter, setShowTagFilter] = useState(false);
+  const [eventTags, setEventTags] = useState<any[]>([]);
+  const [scheduleItemTags, setScheduleItemTags] = useState<any[]>([]);
+  const [selectedEventTags, setSelectedEventTags] = useState<Set<string>>(new Set());
+  const [selectedScheduleItemTags, setSelectedScheduleItemTags] = useState<Set<string>>(new Set());
+
   // Get organization info
   const [organisationName, setOrganisationName] = useState<string | null>(null);
   const [organisationLogo, setOrganisationLogo] = useState<string | null>(null);
@@ -74,7 +91,12 @@ const Dashboard: React.FC = () => {
       }
 
       try {
-        const serverEvents = await api.listEvents(orgId)
+        const [serverEvents, eventTagsData, scheduleItemTagsData] = await Promise.all([
+          api.listEvents(orgId),
+          api.getEventTags(orgId),
+          api.getScheduleItemTags(orgId)
+        ]);
+        
         setEvents(
           serverEvents.map((e: any) => ({
             ...e,
@@ -92,7 +114,10 @@ const Dashboard: React.FC = () => {
               })),
             })),
           }))
-        )
+        );
+        
+        setEventTags(eventTagsData);
+        setScheduleItemTags(scheduleItemTagsData);
       } catch (err) {
         console.error('Failed to fetch events', err)
       }
@@ -146,13 +171,19 @@ const Dashboard: React.FC = () => {
     setDeleteConfirm({ isOpen: true, type: 'event', id: eventId });
   };
 
-  const confirmDeleteEvent = () => {
+  const confirmDeleteEvent = async () => {
     const eventId = deleteConfirm.id;
-    setEventsState(events.filter((e) => e.id !== eventId));
-    if (selectedEvent?.id === eventId) {
-      setSelectedEvent(null);
+    try {
+      await api.deleteEvent(eventId);
+      setEventsState(events.filter((e) => e.id !== eventId));
+      if (selectedEvent?.id === eventId) {
+        setSelectedEvent(null);
+      }
+      setDeleteConfirm({ isOpen: false, type: 'event', id: '' });
+    } catch (err) {
+      console.error('Delete event failed', err);
+      setDeleteConfirm({ isOpen: false, type: 'event', id: '' });
     }
-    setDeleteConfirm({ isOpen: false, type: 'event', id: '' });
   };
 
   // DayPlan CRUD operations
@@ -161,7 +192,25 @@ const Dashboard: React.FC = () => {
   ) => {
     if (!selectedEvent) return;
     try {
-      const created = await api.createDayPlan(selectedEvent.id, { name: dayPlanData.name, date: dayPlanData.date, schedule: dayPlanData.schedule })
+      // Filter out client-side only properties and prepare schedule items for API
+      const scheduleForApi = dayPlanData.schedule?.map((item: any) => ({
+        time: item.time || '09:00',
+        type: item.type || 'session',
+        title: item.title || '',
+        speaker: item.speaker,
+        location: item.location,
+        details: item.details,
+        materials: item.materials,
+        duration: item.duration,
+        snacks: item.snacks,
+        facilitator: item.facilitator,
+      })) || [];
+
+      const created = await api.createDayPlan(selectedEvent.id, { 
+        name: dayPlanData.name, 
+        date: dayPlanData.date, 
+        schedule: scheduleForApi 
+      })
       const newDayPlan: DayPlan = {
         id: created.id,
         eventId: selectedEvent.id,
@@ -185,30 +234,64 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const handleUpdateDayPlan = (
+  const handleUpdateDayPlan = async (
     dayPlanData: Omit<DayPlan, "id" | "createdAt" | "updatedAt">
   ) => {
     if (!selectedEvent || !editingDayPlan) return;
 
-    const updatedEvents = events.map((e) =>
-      e.id === selectedEvent.id
-        ? {
-            ...e,
-            dayPlans: e.dayPlans.map((d) =>
-              d.id === editingDayPlan.id
-                ? { ...d, ...dayPlanData, updatedAt: new Date() }
-                : d
-            ),
-            updatedAt: new Date(),
-          }
-        : e
-    );
-    setEventsState(updatedEvents);
-    setSelectedEvent(
-      updatedEvents.find((e) => e.id === selectedEvent.id) || null
-    );
-    setEditingDayPlan(null);
-    setShowDayPlanForm(false);
+    try {
+      // Filter out client-side only properties and prepare schedule items for API
+      const scheduleForApi = dayPlanData.schedule?.map((item: any) => ({
+        time: item.time || '09:00',
+        type: item.type || 'session',
+        title: item.title || '',
+        speaker: item.speaker,
+        location: item.location,
+        details: item.details,
+        materials: item.materials,
+        duration: item.duration,
+        snacks: item.snacks,
+        facilitator: item.facilitator,
+      })) || [];
+
+      await api.updateDayPlan(editingDayPlan.id, {
+        name: dayPlanData.name,
+        date: dayPlanData.date,
+        schedule: scheduleForApi
+      });
+
+      const updatedEvents = events.map((e) =>
+        e.id === selectedEvent.id
+          ? {
+              ...e,
+              dayPlans: e.dayPlans.map((d) =>
+                d.id === editingDayPlan.id
+                  ? { 
+                      ...d, 
+                      ...dayPlanData,
+                      schedule: (dayPlanData.schedule || []).map((item: any) => ({
+                        id: item.id,
+                        time: item.time,
+                        type: item.type,
+                        title: item.title
+                      })),
+                      updatedAt: new Date() 
+                    }
+                  : d
+              ),
+              updatedAt: new Date(),
+            }
+          : e
+      );
+      setEventsState(updatedEvents);
+      setSelectedEvent(
+        updatedEvents.find((e) => e.id === selectedEvent.id) || null
+      );
+      setEditingDayPlan(null);
+      setShowDayPlanForm(false);
+    } catch (err) {
+      console.error('Update day plan failed', err)
+    }
   };
 
   const handleDeleteDayPlan = (dayPlanId: string) => {
@@ -216,23 +299,29 @@ const Dashboard: React.FC = () => {
     setDeleteConfirm({ isOpen: true, type: 'dayPlan', id: dayPlanId });
   };
 
-  const confirmDeleteDayPlan = () => {
+  const confirmDeleteDayPlan = async () => {
     if (!selectedEvent) return;
     const dayPlanId = deleteConfirm.id;
-    const updatedEvents = events.map((e) =>
-      e.id === selectedEvent.id
-        ? {
-            ...e,
-            dayPlans: e.dayPlans.filter((d) => d.id !== dayPlanId),
-            updatedAt: new Date(),
-          }
-        : e
-    );
-    setEventsState(updatedEvents);
-    setSelectedEvent(
-      updatedEvents.find((e) => e.id === selectedEvent.id) || null
-    );
-    setDeleteConfirm({ isOpen: false, type: 'dayPlan', id: '' });
+    try {
+      await api.deleteDayPlan(dayPlanId);
+      const updatedEvents = events.map((e) =>
+        e.id === selectedEvent.id
+          ? {
+              ...e,
+              dayPlans: e.dayPlans.filter((d) => d.id !== dayPlanId),
+              updatedAt: new Date(),
+            }
+          : e
+      );
+      setEventsState(updatedEvents);
+      setSelectedEvent(
+        updatedEvents.find((e) => e.id === selectedEvent.id) || null
+      );
+      setDeleteConfirm({ isOpen: false, type: 'dayPlan', id: '' });
+    } catch (err) {
+      console.error('Delete day plan failed', err);
+      setDeleteConfirm({ isOpen: false, type: 'dayPlan', id: '' });
+    }
   };
 
   const handleLogout = async () => {
@@ -241,6 +330,53 @@ const Dashboard: React.FC = () => {
     } catch {}
     navigate("/");
   };
+
+  // Filter events based on search query
+  const filteredEvents = useMemo(() => {
+    if (!searchQuery.trim()) return events;
+    const query = searchQuery.toLowerCase();
+    return events.filter(event => 
+      event.name.toLowerCase().includes(query) ||
+      event.description?.toLowerCase().includes(query) ||
+      event.dayPlans.some(dp => 
+        dp.name.toLowerCase().includes(query) ||
+        new Date(dp.date).toLocaleDateString('de-DE').includes(query)
+      )
+    );
+  }, [events, searchQuery]);
+
+  // Filter day plans for selected event
+  const filteredDayPlans = useMemo(() => {
+    if (!selectedEvent) return [];
+    if (!searchQuery.trim()) return selectedEvent.dayPlans;
+    const query = searchQuery.toLowerCase();
+    return selectedEvent.dayPlans.filter(dp =>
+      dp.name.toLowerCase().includes(query) ||
+      new Date(dp.date).toLocaleDateString('de-DE').includes(query)
+    );
+  }, [selectedEvent, searchQuery]);
+
+  // Toggle event collapse
+  const toggleEventCollapse = (eventId: string) => {
+    setCollapsedEvents(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(eventId)) {
+        newSet.delete(eventId);
+      } else {
+        newSet.add(eventId);
+      }
+      return newSet;
+    });
+  };
+
+  // Calculate stats
+  // const stats = useMemo(() => {
+  //   const totalDayPlans = events.reduce((sum, e) => sum + e.dayPlans.length, 0);
+  //   const totalScheduleItems = events.reduce((sum, e) => 
+  //     sum + e.dayPlans.reduce((s, dp) => s + dp.schedule.length, 0), 0
+  //   );
+  //   return { totalEvents: events.length, totalDayPlans, totalScheduleItems };
+  // }, [events]);
 
   const handleSaveSchedule = (schedule: ScheduleItem[]) => {
     if (!selectedEvent || !managingSchedule) return;
@@ -506,6 +642,356 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
+        {/* Search & View Toggle */}
+        <div style={{ marginBottom: '1.5rem' }}>
+          <div style={{
+            display: 'flex',
+            gap: '0.75rem',
+            alignItems: 'center',
+            maxWidth: '1400px',
+            margin: '0 auto',
+            width: '100%',
+            flexWrap: 'wrap'
+          }}>
+            {/* Search Bar */}
+            <div style={{ flex: '1 1 300px', position: 'relative' }}>
+              <Search 
+                size={18} 
+                style={{
+                  position: 'absolute',
+                  left: '1rem',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: '#64748b',
+                  pointerEvents: 'none'
+                }}
+              />
+              <input
+                type="text"
+                placeholder="Veranstaltungen oder Tagespläne suchen..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem 8rem 0.75rem 3rem',
+                  border: '2px solid #cbd5e1',
+                  borderRadius: '10px',
+                  fontSize: '0.95rem',
+                  fontFamily: '"Inter", "Roboto", Arial, sans-serif',
+                  backgroundColor: '#fff',
+                  transition: 'all 0.2s ease',
+                  outline: 'none'
+                }}
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = '#0ea5e9';
+                  e.currentTarget.style.boxShadow = '0 0 0 3px rgba(14, 165, 233, 0.1)';
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = '#cbd5e1';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
+              />
+              
+              {/* Filter Button */}
+              <button
+                onClick={() => setShowTagFilter(!showTagFilter)}
+                style={{
+                  position: 'absolute',
+                  right: searchQuery ? '3rem' : '1rem',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: (selectedEventTags.size > 0 || selectedScheduleItemTags.size > 0) ? '#a855f7' : '#f1f5f9',
+                  border: '2px solid #cbd5e1',
+                  cursor: 'pointer',
+                  color: (selectedEventTags.size > 0 || selectedScheduleItemTags.size > 0) ? '#fff' : '#64748b',
+                  padding: '0.5rem 0.75rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.375rem',
+                  borderRadius: '6px',
+                  fontSize: '0.85rem',
+                  fontFamily: '"Inter", "Roboto", Arial, sans-serif',
+                  fontWeight: '600',
+                  transition: 'all 0.2s ease',
+                  boxShadow: (selectedEventTags.size > 0 || selectedScheduleItemTags.size > 0) ? '0 2px 4px rgba(168, 85, 247, 0.3)' : 'none'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = (selectedEventTags.size > 0 || selectedScheduleItemTags.size > 0) ? '#9333ea' : '#e2e8f0';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = (selectedEventTags.size > 0 || selectedScheduleItemTags.size > 0) ? '#a855f7' : '#f1f5f9';
+                }}
+              >
+                <Filter size={14} />
+                {(selectedEventTags.size + selectedScheduleItemTags.size) > 0 && (
+                  <span>{selectedEventTags.size + selectedScheduleItemTags.size}</span>
+                )}
+              </button>
+
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  style={{
+                    position: 'absolute',
+                    right: '1rem',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: '#64748b',
+                    padding: '0.25rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: '4px',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#f1f5f9';
+                    e.currentTarget.style.color = '#dc2626';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.color = '#64748b';
+                  }}
+                >
+                  <X size={16} />
+                </button>
+              )}
+            </div>
+
+            {/* View Toggle */}
+            <div style={{
+              display: 'flex',
+              gap: '0.5rem',
+              padding: '0.25rem',
+              backgroundColor: '#f1f5f9',
+              borderRadius: '8px',
+              border: '2px solid #cbd5e1'
+            }}>
+              <button
+                onClick={() => setViewMode('detailed')}
+                style={{
+                  padding: '0.5rem 1rem',
+                  border: 'none',
+                  borderRadius: '6px',
+                  backgroundColor: viewMode === 'detailed' ? '#fff' : 'transparent',
+                  color: viewMode === 'detailed' ? '#0f172a' : '#64748b',
+                  cursor: 'pointer',
+                  fontFamily: '"Inter", "Roboto", Arial, sans-serif',
+                  fontWeight: '600',
+                  fontSize: '0.85rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  transition: 'all 0.2s ease',
+                  boxShadow: viewMode === 'detailed' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
+                }}
+              >
+                <Grid size={16} />
+                Details
+              </button>
+              <button
+                onClick={() => setViewMode('compact')}
+                style={{
+                  padding: '0.5rem 1rem',
+                  border: 'none',
+                  borderRadius: '6px',
+                  backgroundColor: viewMode === 'compact' ? '#fff' : 'transparent',
+                  color: viewMode === 'compact' ? '#0f172a' : '#64748b',
+                  cursor: 'pointer',
+                  fontFamily: '"Inter", "Roboto", Arial, sans-serif',
+                  fontWeight: '600',
+                  fontSize: '0.85rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  transition: 'all 0.2s ease',
+                  boxShadow: viewMode === 'compact' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
+                }}
+              >
+                <List size={16} />
+                Kompakt
+              </button>
+            </div>
+          </div>
+
+          {/* Tag Filter Dropdown */}
+          {showTagFilter && (eventTags.length > 0 || scheduleItemTags.length > 0) && (
+            <div style={{
+              maxWidth: '1400px',
+              margin: '0.75rem auto 0',
+              width: '100%',
+              backgroundColor: '#fff',
+              border: '2px solid #181818',
+              borderRadius: '12px',
+              padding: '1.5rem',
+              boxShadow: '2px 4px 0 #e5e7eb, 0 2px 8px 0 rgba(0,0,0,0.08)',
+              animation: 'slideDown 0.2s ease',
+              position: 'relative' as const,
+              transform: 'rotate(0.1deg)',
+            }}>
+              <style>
+                {`
+                  @keyframes slideDown {
+                    from {
+                      opacity: 0;
+                      transform: translateY(-10px) rotate(0.1deg);
+                    }
+                    to {
+                      opacity: 1;
+                      transform: translateY(0) rotate(0.1deg);
+                    }
+                  }
+                `}
+              </style>
+
+              {eventTags.length > 0 && (
+                <div style={{ marginBottom: scheduleItemTags.length > 0 ? '1.5rem' : '0' }}>
+                  <div style={{
+                    fontSize: '0.75rem',
+                    fontWeight: '700',
+                    fontFamily: '"Gloria Hallelujah", "Caveat", cursive',
+                    color: '#0f172a',
+                    marginBottom: '0.875rem',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}>
+                    <div style={{
+                      width: '4px',
+                      height: '16px',
+                      backgroundColor: '#a855f7',
+                      borderRadius: '2px'
+                    }} />
+                    Veranstaltungs-Tags
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.625rem' }}>
+                    {eventTags.map(tag => (
+                      <button
+                        key={tag.id}
+                        onClick={() => {
+                          const newSelected = new Set(selectedEventTags);
+                          if (newSelected.has(tag.id)) {
+                            newSelected.delete(tag.id);
+                          } else {
+                            newSelected.add(tag.id);
+                          }
+                          setSelectedEventTags(newSelected);
+                        }}
+                        style={{
+                          padding: '0.5rem 1rem',
+                          border: `2px solid ${tag.color}`,
+                          borderRadius: '20px',
+                          backgroundColor: selectedEventTags.has(tag.id) ? tag.color : '#fff',
+                          color: selectedEventTags.has(tag.id) ? '#fff' : tag.color,
+                          fontSize: '0.875rem',
+                          fontWeight: '600',
+                          fontFamily: '"Inter", "Roboto", Arial, sans-serif',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.4rem',
+                          boxShadow: selectedEventTags.has(tag.id) ? `2px 4px 0 ${tag.color}` : 'none'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!selectedEventTags.has(tag.id)) {
+                            e.currentTarget.style.backgroundColor = `${tag.color}15`;
+                            e.currentTarget.style.transform = 'translateY(-2px)';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!selectedEventTags.has(tag.id)) {
+                            e.currentTarget.style.backgroundColor = '#fff';
+                            e.currentTarget.style.transform = 'translateY(0)';
+                          }
+                        }}
+                      >
+                        {tag.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {scheduleItemTags.length > 0 && (
+                <div>
+                  <div style={{
+                    fontSize: '0.75rem',
+                    fontWeight: '700',
+                    fontFamily: '"Gloria Hallelujah", "Caveat", cursive',
+                    color: '#0f172a',
+                    marginBottom: '0.875rem',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}>
+                    <div style={{
+                      width: '4px',
+                      height: '16px',
+                      backgroundColor: '#10b981',
+                      borderRadius: '2px'
+                    }} />
+                    Termin-Tags
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.625rem' }}>
+                    {scheduleItemTags.map(tag => (
+                      <button
+                        key={tag.id}
+                        onClick={() => {
+                          const newSelected = new Set(selectedScheduleItemTags);
+                          if (newSelected.has(tag.id)) {
+                            newSelected.delete(tag.id);
+                          } else {
+                            newSelected.add(tag.id);
+                          }
+                          setSelectedScheduleItemTags(newSelected);
+                        }}
+                        style={{
+                          padding: '0.5rem 1rem',
+                          border: `2px solid ${tag.color}`,
+                          borderRadius: '20px',
+                          backgroundColor: selectedScheduleItemTags.has(tag.id) ? tag.color : '#fff',
+                          color: selectedScheduleItemTags.has(tag.id) ? '#fff' : tag.color,
+                          fontSize: '0.875rem',
+                          fontWeight: '600',
+                          fontFamily: '"Inter", "Roboto", Arial, sans-serif',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.4rem',
+                          boxShadow: selectedScheduleItemTags.has(tag.id) ? `2px 4px 0 ${tag.color}` : 'none'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!selectedScheduleItemTags.has(tag.id)) {
+                            e.currentTarget.style.backgroundColor = `${tag.color}15`;
+                            e.currentTarget.style.transform = 'translateY(-2px)';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!selectedScheduleItemTags.has(tag.id)) {
+                            e.currentTarget.style.backgroundColor = '#fff';
+                            e.currentTarget.style.transform = 'translateY(0)';
+                          }
+                        }}
+                      >
+                        {tag.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
         {/* Content Grid */}
         <div
           style={{
@@ -513,7 +999,7 @@ const Dashboard: React.FC = () => {
             flexDirection: "column",
             alignItems: "center",
             gap: "clamp(1.25rem, 3vw, 2rem)",
-            maxWidth: "900px",
+            maxWidth: "1400px",
             margin: "0 auto",
             width: "100%"
           }}
@@ -527,7 +1013,7 @@ const Dashboard: React.FC = () => {
             gap: "clamp(1.25rem, 3vw, 2rem)",
             alignItems: "start",
             width: "100%",
-            maxWidth: "900px"
+            maxWidth: "1400px"
           }}
         >
           {/* Events List */}
@@ -571,7 +1057,7 @@ const Dashboard: React.FC = () => {
                 }}
               >
                 <Folder size={24} strokeWidth={2.5} />
-                Veranstaltungen ({events.length})
+                Veranstaltungen ({filteredEvents.length}{filteredEvents.length !== events.length ? ` von ${events.length}` : ''})
               </h2>
               <button
                 onClick={() => setShowWizard(true)}
@@ -601,7 +1087,7 @@ const Dashboard: React.FC = () => {
             <div
               style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
             >
-              {events.length === 0 ? (
+              {filteredEvents.length === 0 ? (
                 <div
                   style={{
                     padding: "2.5rem",
@@ -615,27 +1101,29 @@ const Dashboard: React.FC = () => {
                     backgroundColor: "#f8fafc",
                   }}
                 >
-                  Noch keine Veranstaltungen. Klicke auf "Neu" um zu starten!
+                  {searchQuery ? `Keine Ergebnisse für "${searchQuery}"` : 'Noch keine Veranstaltungen. Klicke auf "Neu" um zu starten!'}
                 </div>
               ) : (
-                events.map((event) => (
+                filteredEvents.map((event) => {
+                  const isCollapsed = collapsedEvents.has(event.id);
+                  const isCompact = viewMode === 'compact';
+                  
+                  return (
                   <div
                     key={event.id}
-                    onClick={() => setSelectedEvent(event)}
                     style={{
-                      padding: "1.25rem",
                       border: `2px solid ${
                         selectedEvent?.id === event.id ? "#181818" : "#cbd5e1"
                       }`,
                       borderRadius: "12px",
                       backgroundColor:
                         selectedEvent?.id === event.id ? "#fef3c7" : "#f8fafc",
-                      cursor: "pointer",
                       transition: "all 0.2s ease",
                       boxShadow:
                         selectedEvent?.id === event.id
                           ? "2px 4px 0 #181818"
                           : "0 1px 3px rgba(0,0,0,0.1)",
+                      overflow: 'hidden'
                     }}
                     onMouseEnter={(e) => {
                       if (selectedEvent?.id !== event.id) {
@@ -651,58 +1139,95 @@ const Dashboard: React.FC = () => {
                       }
                     }}
                   >
+                    {/* Event Header - Always visible */}
                     <div
+                      onClick={() => setSelectedEvent(event)}
                       style={{
+                        padding: isCompact ? "0.875rem 1rem" : "1.25rem",
+                        cursor: "pointer",
                         display: "flex",
                         justifyContent: "space-between",
                         alignItems: "start",
                         gap: "1rem",
                       }}
                     >
-                      <div style={{ flex: 1 }}>
-                        <h3
-                          style={{
-                            fontFamily:
-                              '"Gloria Hallelujah", "Caveat", "Comic Neue", cursive, sans-serif',
-                            fontSize: "clamp(1.1rem, 2.5vw, 1.25rem)",
-                            fontWeight: "700",
-                            color: "#0f172a",
-                            marginBottom: "0.5rem",
-                            margin: 0,
-                          }}
-                        >
-                          {event.name}
-                        </h3>
-                        {event.description && (
-                          <p
+                      <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        {/* Collapse Toggle */}
+                        {!isCompact && event.dayPlans.length > 0 && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleEventCollapse(event.id);
+                            }}
                             style={{
-                              fontFamily:
-                                '"Inter", "Roboto", Arial, sans-serif',
-                              fontSize: "0.9rem",
-                              color: "#475569",
-                              marginBottom: "0.75rem",
-                              fontWeight: "500",
+                              background: 'none',
+                              border: 'none',
+                              cursor: 'pointer',
+                              padding: '0.25rem',
+                              display: 'flex',
+                              alignItems: 'center',
+                              color: '#64748b',
+                              transition: 'all 0.2s ease'
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.color = '#0f172a';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.color = '#64748b';
                             }}
                           >
-                            {event.description}
-                          </p>
+                            {isCollapsed ? <ChevronRight size={20} /> : <ChevronDown size={20} />}
+                          </button>
                         )}
-                        <div
-                          style={{
-                            fontFamily: '"Inter", "Roboto", Arial, sans-serif',
-                            fontSize: "0.85rem",
-                            color: "#64748b",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "0.5rem",
-                            fontWeight: "600",
-                          }}
-                        >
-                          <FileText size={14} strokeWidth={2} />
-                          {event.dayPlans.length} Tagesplan
-                          {event.dayPlans.length !== 1 ? "e" : ""}
+                        
+                        <div style={{ flex: 1 }}>
+                          <h3
+                            style={{
+                              fontFamily:
+                                '"Gloria Hallelujah", "Caveat", "Comic Neue", cursive, sans-serif',
+                              fontSize: isCompact ? "1rem" : "clamp(1.1rem, 2.5vw, 1.25rem)",
+                              fontWeight: "700",
+                              color: "#0f172a",
+                              marginBottom: isCompact || !event.description ? "0.25rem" : "0.5rem",
+                              margin: 0,
+                            }}
+                          >
+                            {event.name}
+                          </h3>
+                          {!isCompact && event.description && (
+                            <p
+                              style={{
+                                fontFamily:
+                                  '"Inter", "Roboto", Arial, sans-serif',
+                                fontSize: "0.9rem",
+                                color: "#475569",
+                                marginBottom: "0.75rem",
+                                fontWeight: "500",
+                                margin: "0.5rem 0 0 0"
+                              }}
+                            >
+                              {event.description}
+                            </p>
+                          )}
+                          <div
+                            style={{
+                              fontFamily: '"Inter", "Roboto", Arial, sans-serif',
+                              fontSize: "0.85rem",
+                              color: "#64748b",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "0.5rem",
+                              fontWeight: "600",
+                              marginTop: isCompact ? "0" : "0.5rem"
+                            }}
+                          >
+                            <FileText size={14} strokeWidth={2} />
+                            {event.dayPlans.length} Tagesplan
+                            {event.dayPlans.length !== 1 ? "e" : ""}
+                          </div>
                         </div>
                       </div>
+                      
                       <div
                         style={{
                           display: "flex",
@@ -770,8 +1295,85 @@ const Dashboard: React.FC = () => {
                         </button>
                       </div>
                     </div>
+
+                    {/* Event Day Plans Preview - Collapsible in detailed mode */}
+                    {!isCompact && !isCollapsed && event.dayPlans.length > 0 && (
+                      <div style={{
+                        padding: '0 1.25rem 1.25rem 1.25rem',
+                        borderTop: '1px solid #e2e8f0',
+                        backgroundColor: 'rgba(255,255,255,0.5)'
+                      }}>
+                        <div style={{
+                          fontSize: '0.75rem',
+                          fontWeight: '700',
+                          fontFamily: '"Inter", "Roboto", Arial, sans-serif',
+                          color: '#64748b',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.05em',
+                          marginBottom: '0.75rem',
+                          marginTop: '0.75rem'
+                        }}>
+                          Tagespläne
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                          {event.dayPlans
+                            .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+                            .slice(0, 3)
+                            .map(dp => (
+                            <div
+                              key={dp.id}
+                              style={{
+                                padding: '0.625rem 0.875rem',
+                                backgroundColor: '#fff',
+                                border: '1px solid #e2e8f0',
+                                borderRadius: '6px',
+                                fontSize: '0.85rem',
+                                fontFamily: '"Inter", "Roboto", Arial, sans-serif',
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                gap: '0.75rem'
+                              }}
+                            >
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <div style={{
+                                  fontWeight: '600',
+                                  color: '#0f172a',
+                                  whiteSpace: 'nowrap',
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis'
+                                }}>
+                                  {dp.name}
+                                </div>
+                                <div style={{
+                                  fontSize: '0.75rem',
+                                  color: '#64748b',
+                                  marginTop: '0.125rem'
+                                }}>
+                                  {new Date(dp.date).toLocaleDateString('de-DE', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                  {' • '}
+                                  {dp.schedule.length} Termin{dp.schedule.length !== 1 ? 'e' : ''}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                          {event.dayPlans.length > 3 && (
+                            <div style={{
+                              fontSize: '0.75rem',
+                              color: '#64748b',
+                              textAlign: 'center',
+                              fontFamily: '"Inter", "Roboto", Arial, sans-serif',
+                              fontStyle: 'italic',
+                              padding: '0.25rem'
+                            }}>
+                              +{event.dayPlans.length - 3} weitere...
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                ))
+                )})
               )}
             </div>
           </div>
@@ -823,7 +1425,7 @@ const Dashboard: React.FC = () => {
                   }}
                 >
                   <Calendar size={24} strokeWidth={2.5} />
-                  Tagespläne ({selectedEvent.dayPlans.length})
+                  Tagespläne ({filteredDayPlans.length}{filteredDayPlans.length !== selectedEvent.dayPlans.length ? ` von ${selectedEvent.dayPlans.length}` : ''})
                 </h2>
                 <button
                   onClick={() => setShowDayPlanForm(true)}
@@ -891,7 +1493,7 @@ const Dashboard: React.FC = () => {
                   gap: "1rem",
                 }}
               >
-                {selectedEvent.dayPlans.length === 0 ? (
+                {filteredDayPlans.length === 0 ? (
                   <div
                     style={{
                       padding: "2.5rem",
@@ -905,11 +1507,10 @@ const Dashboard: React.FC = () => {
                       backgroundColor: "#f8fafc",
                     }}
                   >
-                    Noch keine Tagespläne. Klicke auf "Neu" um einen zu
-                    erstellen!
+                    {searchQuery ? `Keine Ergebnisse für "${searchQuery}"` : 'Noch keine Tagespläne. Klicke auf "Neu" um einen zu erstellen!'}
                   </div>
                 ) : (
-                  selectedEvent.dayPlans
+                  filteredDayPlans
                     .sort(
                       (a, b) =>
                         new Date(a.date).getTime() - new Date(b.date).getTime()

@@ -3,16 +3,21 @@ import express, { Request, Response, NextFunction } from 'express'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import path from 'path'
+import http from 'http'
 import authRoutes from './routes/auth'
 import organisationsRoutes from './routes/organisations'
 import eventsRoutes from './routes/events'
 import emailRoutes from "./routes/email";
 import uploadRoutes from './routes/upload';
+import tagsRoutes from './routes/tags';
+import devicesRoutes from './routes/devices';
 import { logger } from "./logger";
 import { testConnection, isEmailEnabled } from "./mailer";
 import { validateURLGeneration } from "./utils/urlHelper";
+import { setupSocketIO } from './socket';
 
 const app = express();
+const httpServer = http.createServer(app);
 const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
 // Optional base path for running behind reverse proxies (e.g., /minihackathon)
 const BASE_PATH = (process.env.APP_BASE_PATH || '').trim();
@@ -94,6 +99,14 @@ app.use(`${apiBase}`, eventsRoutes);
 app.use(`${apiBase}/auth`, authRoutes);
 app.use(`${apiBase}/email`, emailRoutes);
 app.use(`${apiBase}/upload`, uploadRoutes);
+app.use(`${apiBase}`, tagsRoutes);
+app.use(`${apiBase}`, devicesRoutes);
+
+// Setup Socket.IO
+const io = setupSocketIO(httpServer);
+
+// Make io accessible in routes via app.locals
+app.locals.io = io;
 
 // Test SMTP connection on startup (non-blocking)
 async function testEmailOnStartup() {
@@ -111,8 +124,9 @@ async function testEmailOnStartup() {
   }
 }
 
-app.listen(PORT, () => {
+httpServer.listen(PORT, () => {
   logger.info(`API listening on http://localhost:${PORT}`)
+  logger.info(`Socket.IO ready for device pairing`)
   
   // Test email connection after server starts (don't block startup)
   setTimeout(() => {

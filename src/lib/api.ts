@@ -40,8 +40,8 @@ export type AcceptInvitationResponse = {
   organisation: Organisation;
 };
 
-// Get API base URL from environment or default to relative path with base path
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/minihackathon';
+// Get API base URL from environment or default to /api (not including the app base path)
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 async function json<T>(input: RequestInfo, init?: RequestInit): Promise<T> {
   const url = typeof input === 'string' ? `${API_BASE_URL}${input}` : input;
@@ -227,4 +227,51 @@ export const api = {
       method: 'DELETE',
     })
   },
+  // Event Tags
+  getEventTags(orgId: string): Promise<any[]> {
+    return json<any[]>(`/api/organisations/${orgId}/event-tags`)
+  },
+  createEventTag(orgId: string, data: { name: string; color?: string }): Promise<any> {
+    return json<any>(`/api/organisations/${orgId}/event-tags`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+  },
+  updateEventTag(tagId: string, data: { name?: string; color?: string }): Promise<any> {
+    return json<any>(`/api/event-tags/${tagId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+  },
+  deleteEventTag(tagId: string): Promise<{ success: boolean }> {
+    return json<{ success: boolean }>(`/api/event-tags/${tagId}`, {
+      method: 'DELETE',
+    })
+  },
+  // Schedule Item Tags
+  getScheduleItemTags(orgId: string): Promise<any[]> {
+    return json<any[]>(`/api/organisations/${orgId}/schedule-item-tags`)
+  },
+  createScheduleItemTag(orgId: string, data: { name: string; color?: string }): Promise<any> {
+    return json<any>(`/api/organisations/${orgId}/schedule-item-tags`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+  },
+  updateScheduleItemTag(tagId: string, data: { name?: string; color?: string }): Promise<any> {
+    return json<any>(`/api/schedule-item-tags/${tagId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+  },
+  deleteScheduleItemTag(tagId: string): Promise<{ success: boolean }> {
+    return json<{ success: boolean }>(`/api/schedule-item-tags/${tagId}`, {
+      method: 'DELETE',
+    })
+  },
 };
+

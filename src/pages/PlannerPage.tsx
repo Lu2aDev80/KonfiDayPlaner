@@ -3,13 +3,6 @@ import { useSearchParams } from 'react-router-dom';
 import Planer from '../components/planner/Planer';
 import type { ScheduleItem } from '../types/schedule';
 
-interface DayPlan {
-  id: string;
-  name: string;
-  date: string;
-  schedule: ScheduleItem[];
-}
-
 // Sample schedule for demo/development
 // Includes examples of time and position changes for demonstration
 const sampleSchedule: ScheduleItem[] = [
@@ -73,35 +66,44 @@ const PlannerPage: React.FC = () => {
   });
   
   const dayPlanId = searchParams.get('dayPlanId');
-  const orgId = searchParams.get('org');
 
-  // Load from database via API instead of localStorage
+  // Load from database via API
   React.useEffect(() => {
     const fetchDayPlan = async () => {
-      if (dayPlanId && orgId) {
+      if (dayPlanId) {
         try {
           // Import the API from the lib
           const { api } = await import('../lib/api');
           
-          // Fetch events for the organization from the database
-          const events = await api.listEvents(orgId);
+          // Fetch the specific day plan directly
+          const dayPlan = await api.getDayPlan(dayPlanId);
           
-          // Find the day plan
-          for (const event of events) {
-            const dayPlan = event.dayPlans?.find((dp: DayPlan) => dp.id === dayPlanId);
-            if (dayPlan) {
-              const newSchedule = dayPlan.schedule || [];
-              const newTitle = dayPlan.name;
-              const newDate = new Date(dayPlan.date).toLocaleDateString('de-DE', {
-                weekday: 'long',
-                month: 'long',
-                day: 'numeric',
-                year: 'numeric'
-              });
-              // Force re-render by updating state
-              setScheduleData({ schedule: newSchedule, title: newTitle, date: newDate });
-              break;
-            }
+          if (dayPlan) {
+            // Map scheduleItems to schedule format expected by Planer component
+            const newSchedule = (dayPlan.scheduleItems || []).map((item: any) => ({
+              id: item.id,
+              time: item.time,
+              type: item.type,
+              title: item.title,
+              speaker: item.speaker,
+              location: item.location,
+              details: item.details,
+              materials: item.materials,
+              duration: item.duration,
+              snacks: item.snacks,
+              facilitator: item.facilitator,
+            }));
+            
+            const newTitle = dayPlan.name;
+            const newDate = new Date(dayPlan.date).toLocaleDateString('de-DE', {
+              weekday: 'long',
+              month: 'long',
+              day: 'numeric',
+              year: 'numeric'
+            });
+            
+            // Update state with fetched data
+            setScheduleData({ schedule: newSchedule, title: newTitle, date: newDate });
           }
         } catch (error) {
           console.error('Error loading schedule from database:', error);
@@ -121,7 +123,7 @@ const PlannerPage: React.FC = () => {
     };
     
     fetchDayPlan();
-  }, [dayPlanId, orgId]);
+  }, [dayPlanId]);
 
   return (
     <Planer 
