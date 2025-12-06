@@ -12,7 +12,7 @@ function generatePairingCode(): string {
 
 // Check if a pairing code is unique
 async function isCodeUnique(code: string): Promise<boolean> {
-  const existing = await prisma.device.findUnique({
+  const existing = await prisma.display.findUnique({
     where: { pairingCode: code }
   });
   return !existing;
@@ -56,45 +56,46 @@ export function setupSocketIO(httpServer: HTTPServer) {
       // Generate unique pairing code
       const pairingCode = await generateUniquePairingCode();
 
-      // Create device entry in database
-      const device = await prisma.device.create({
+      // Create display entry in database
+      const display = await prisma.display.create({
         data: {
           pairingCode,
           socketId: socket.id,
-          status: DeviceStatus.PENDING
+          status: DeviceStatus.PENDING,
+          name: `Display ${pairingCode}`
         }
       });
 
-      logger.info(`Device created with pairing code: ${pairingCode} (${device.id})`);
+      logger.info(`Display created with pairing code: ${pairingCode} (${display.id})`);
 
       // Send pairing code to client
-      socket.emit('pairing-code', { code: pairingCode, deviceId: device.id });
+      socket.emit('pairing-code', { code: pairingCode, deviceId: display.id });
 
-    } catch (error) {
-      logger.error('Error creating device:', error);
+    } catch (error: any) {
+      logger.error('Error creating display:', error);
       socket.emit('error', { message: 'Failed to generate pairing code' });
     }
 
     socket.on('disconnect', () => {
       logger.info(`Socket disconnected: ${socket.id}`);
       
-      // Optionally clean up pending devices after disconnect
-      prisma.device.deleteMany({
+      // Optionally clean up pending displays after disconnect
+      prisma.display.deleteMany({
         where: {
           socketId: socket.id,
           status: DeviceStatus.PENDING
         }
-      }).catch((err: any) => {
-        logger.error('Error cleaning up disconnected device:', err);
+      }).catch((err: Error) => {
+        logger.error('Error cleaning up disconnected display:', err);
       });
     });
   });
 
   // Helper function to emit to a specific socket
-  io.emitToPairedDevice = async (socketId: string, orgId: string, deviceName?: string) => {
+  io.emitToPairedDevice = async (socketId: string, orgId: string, displayId: string, deviceName?: string) => {
     const socket = io.sockets.sockets.get(socketId);
     if (socket) {
-      socket.emit('paired', { orgId, deviceName });
+      socket.emit('paired', { orgId, displayId, deviceName });
       logger.info(`Emitted paired event to socket ${socketId}`);
     } else {
       logger.warn(`Socket ${socketId} not found for paired emission`);
@@ -102,13 +103,16 @@ export function setupSocketIO(httpServer: HTTPServer) {
   };
 
   // Helper function to emit dayplan update to a specific socket
-  io.emitDayPlanUpdate = async (socketId: string, dayPlanId: string) => {
+  io.emitDayPlanUpdate = async (socketId: string, dayPlan: any) => {
+    logger.info(`emitDayPlanUpdate called: socketId=${socketId}, dayPlanId=${dayPlan.id}`);
     const socket = io.sockets.sockets.get(socketId);
     if (socket) {
-      socket.emit('dayplan-assigned', { dayPlanId });
+      logger.info(`Socket found, emitting dayplan-assigned event with full data`);
+      socket.emit('dayplan-assigned', { dayPlan });
       logger.info(`Emitted dayplan-assigned event to socket ${socketId}`);
     } else {
       logger.warn(`Socket ${socketId} not found for dayplan update`);
+      logger.info(`Available sockets: ${Array.from(io.sockets.sockets.keys()).join(', ')}`);
     }
   };
 
@@ -118,7 +122,7 @@ export function setupSocketIO(httpServer: HTTPServer) {
 // Extend Socket.IO types
 declare module 'socket.io' {
   interface Server {
-    emitToPairedDevice(socketId: string, orgId: string, deviceName?: string): Promise<void>;
-    emitDayPlanUpdate(socketId: string, dayPlanId: string): Promise<void>;
+    emitToPairedDevice(socketId: string, orgId: string, displayId: string, deviceName?: string): Promise<void>;
+    emitDayPlanUpdate(socketId: string, dayPlan: any): Promise<void>;
   }
 }

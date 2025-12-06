@@ -10,7 +10,8 @@ import eventsRoutes from './routes/events'
 import emailRoutes from "./routes/email";
 import uploadRoutes from './routes/upload';
 import tagsRoutes from './routes/tags';
-import devicesRoutes from './routes/devices';
+import displayPairingRoutes from './routes/display-pairing';
+import displaysRoutes from './routes/displays';
 import { logger } from "./logger";
 import { testConnection, isEmailEnabled } from "./mailer";
 import { validateURLGeneration } from "./utils/urlHelper";
@@ -93,6 +94,20 @@ app.get(`${apiBase}/debug/urls`, (req: Request, res: Response) => {
   res.json(validation);
 });
 
+import { Server } from 'socket.io';
+
+// Setup Socket.IO first (before routes that need it)
+let io: Server;
+try {
+  io = setupSocketIO(httpServer);
+  app.locals.io = io;
+  logger.info('Socket.IO initialized successfully');
+} catch (error: unknown) {
+  logger.error('Failed to initialize Socket.IO', { error });
+  // Create a dummy io object to prevent crashes
+  app.locals.io = null;
+}
+
 // Routes
 app.use(`${apiBase}/organisations`, organisationsRoutes);
 app.use(`${apiBase}`, eventsRoutes);
@@ -100,13 +115,8 @@ app.use(`${apiBase}/auth`, authRoutes);
 app.use(`${apiBase}/email`, emailRoutes);
 app.use(`${apiBase}/upload`, uploadRoutes);
 app.use(`${apiBase}`, tagsRoutes);
-app.use(`${apiBase}`, devicesRoutes);
-
-// Setup Socket.IO
-const io = setupSocketIO(httpServer);
-
-// Make io accessible in routes via app.locals
-app.locals.io = io;
+app.use(`${apiBase}`, displayPairingRoutes);
+app.use(`${apiBase}`, displaysRoutes);
 
 // Test SMTP connection on startup (non-blocking)
 async function testEmailOnStartup() {

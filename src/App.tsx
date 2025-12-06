@@ -16,7 +16,8 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="/device-pairing" element={<DevicePairingDisplay />} />
+      <Route path="/register-display" element={<DevicePairingDisplay />} />
+      <Route path="/display/:displayId" element={<DevicePairingDisplay />} />
       <Route path="/documentation" element={<Documentation />} />
       <Route path="/login" element={<AdminLogin />} />
       <Route path="/signup" element={<AdminSignup />} />

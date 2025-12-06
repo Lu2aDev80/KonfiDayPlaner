@@ -194,37 +194,26 @@ model ScheduleItemTag {
 
 // Display model for registered display screens
 model Display {
-  id               String   @id @default(uuid())
-  organisationId   String
-  organisation     Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade)
-  name             String   // User-friendly name for the display
-  registrationCode String?  @unique // Temporary code for registration
-  codeExpiresAt    DateTime? // Expiration for registration code
-  isActive         Boolean  @default(true)
-  currentDayPlanId String?  // Currently assigned day plan
-  lastSeenAt       DateTime @default(now()) // For monitoring
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  id               String        @id @default(uuid())
+  organisationId   String?       // Can be null until paired
+  organisation     Organisation? @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+  name             String        // User-friendly name for the display
+  registrationCode String?       @unique // Temporary code for registration via URL
+  codeExpiresAt    DateTime?     // Expiration for registration code
+  pairingCode      String?       @unique // 6-digit pairing code from socket connection
+  socketId         String?       // Socket.io connection ID
+  status           DeviceStatus  @default(PENDING)
+  isActive         Boolean       @default(false)
+  currentDayPlanId String?       // Currently assigned day plan
+  lastSeenAt       DateTime      @default(now()) // For monitoring
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
 
   @@map("displays")
-}
-
-// Device model for device pairing (display registration)
-model Device {
-  id           String       @id @default(cuid())
-  pairingCode  String       @unique // 6-digit pairing code
-  socketId     String       // Socket.io connection ID
-  status       DeviceStatus @default(PENDING)
-  orgId        String?      // Set after pairing
-  name         String?      // Optional device name
-  dayPlanId    String?      // Assigned DayPlan for display
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
-
-  @@map("devices")
 }
 
 enum DeviceStatus {
   PENDING
   PAIRED
+  ACTIVE
 }

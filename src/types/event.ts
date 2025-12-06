@@ -1,21 +1,11 @@
-import type { ScheduleItem } from './schedule';
+import type { DayPlan } from "./schedule";
 
 export interface Event {
   id: string;
   name: string;
   description?: string;
-  organizationId: string;
-  createdAt: Date;
-  updatedAt: Date;
+  organisationId: string;
+  createdAt: string;
+  updatedAt: string;
   dayPlans: DayPlan[];
-}
-
-export interface DayPlan {
-  id: string;
-  eventId: string;
-  name: string;
-  date: string;
-  schedule: ScheduleItem[];
-  createdAt: Date;
-  updatedAt: Date;
 }

@@ -14,57 +14,6 @@ interface AuthRequest extends Request {
 
 const router = Router()
 
-// Initialize a display (create with registration code for device use)
-router.post('/displays/init', async (req, res) => {
-  try {
-    const { id } = req.body
-
-    // Validate ID
-    if (!id) {
-      return res.status(400).json({ error: 'Display ID is required' })
-    }
-
-    // Check if display already exists
-    const existing = await prisma.display.findUnique({ where: { id } })
-    if (existing) {
-      return res.json(existing)
-    }
-
-    // Generate a 6-digit code
-    let code = Math.floor(100000 + Math.random() * 900000).toString()
-    let codeExists = await prisma.display.findUnique({ where: { registrationCode: code } })
-    let attempts = 0
-    while (codeExists && attempts < 10) {
-      code = Math.floor(100000 + Math.random() * 900000).toString()
-      codeExists = await prisma.display.findUnique({ where: { registrationCode: code } })
-      attempts++
-    }
-
-    if (codeExists) {
-      return res.status(500).json({ error: 'Could not generate unique code' })
-    }
-
-    // Code expires in 1 hour
-    const expiresAt = new Date(Date.now() + 60 * 60 * 1000)
-
-    // Create display with code
-    const display = await prisma.display.create({
-      data: {
-        id,
-        name: `Display ${code}`,
-        registrationCode: code,
-        codeExpiresAt: expiresAt,
-        isActive: false,
-        organisationId: '', // Will be set when registered
-      },
-    })
-
-    res.status(201).json(display)
-  } catch (error) {
-    console.error('Error initializing display:', error)
-    res.status(500).json({ error: 'Failed to initialize display' })
-  }
-})
 
 // Generate a registration code for a new display
 router.post('/displays/generate-code', async (req, res) => {
@@ -94,7 +43,7 @@ router.post('/displays/generate-code', async (req, res) => {
 })
 
 // Register a display with a code (admin entering code in settings)
-router.post('/displays/register', async (req, res) => {
+router.post('/displays', async (req, res) => {
   try {
     const { code, organisationId, name } = req.body
 
@@ -258,7 +207,7 @@ router.patch('/displays/:displayId', requireAuth, async (req: AuthRequest, res) 
       return res.status(403).json({ error: 'Access denied' })
     }
 
-    const data: any = {}
+    const data: { name?: string; currentDayPlanId?: string; isActive?: boolean } = {}
     if (name !== undefined) data.name = name
     if (currentDayPlanId !== undefined) data.currentDayPlanId = currentDayPlanId
     if (isActive !== undefined) data.isActive = isActive
@@ -297,6 +246,61 @@ router.delete('/displays/:displayId', requireAuth, async (req: AuthRequest, res)
     res.status(500).json({ error: 'Failed to delete display' })
   }
 })
+
+// Get all unassigned displays
+router.get('/displays/unassigned', requireAuth, async (req: AuthRequest, res) => {
+  try {
+    // In a real multi-tenant app, this should be restricted to super-admins.
+    // For this project, any authenticated admin can see unassigned displays.
+    if (req.user?.role !== 'admin') {
+      return res.status(403).json({ error: 'Only admins can view unassigned displays.' });
+    }
+
+    const displays = await prisma.display.findMany({
+      where: { organisationId: null },
+      orderBy: { createdAt: 'desc' },
+    });
+    res.json(displays);
+  } catch (error) {
+    console.error('Error listing unassigned displays:', error);
+    res.status(500).json({ error: 'Failed to list unassigned displays' });
+  }
+});
+
+// Assign a display to an organisation
+router.patch('/displays/:displayId/assign', requireAuth, async (req: AuthRequest, res) => {
+  try {
+    const { displayId } = req.params;
+    const { organisationId } = req.body;
+
+    // Ensure the user is an admin of the target organisation
+    if (req.user?.role !== 'admin' || req.user?.organisationId !== organisationId) {
+      return res.status(403).json({ error: 'You do not have permission to assign a display to this organisation.' });
+    }
+
+    const display = await prisma.display.findUnique({ where: { id: displayId } });
+    if (!display) {
+      return res.status(404).json({ error: 'Display not found' });
+    }
+
+    // Optional: Check if the display is already assigned
+    if (display.organisationId) {
+      return res.status(409).json({ error: 'This display is already assigned to an organisation.' });
+    }
+
+    const updatedDisplay = await prisma.display.update({
+      where: { id: displayId },
+      data: { organisationId },
+      include: { organisation: true },
+    });
+
+    res.json(updatedDisplay);
+  } catch (error) {
+    console.error('Error assigning display:', error);
+    res.status(500).json({ error: 'Failed to assign display' });
+  }
+});
+
 
 // Get display data for viewing (public, no auth needed)
 router.get('/displays/:displayId/view', async (req, res) => {

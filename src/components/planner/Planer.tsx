@@ -18,6 +18,8 @@ interface PlanerProps {
   debug?: boolean; // enables visual debug (no dimming, interactive)
   showClock?: boolean; // show live updating clock
   autoCenter?: boolean; // automatically center current activity
+  displayInfo?: string; // optional display name/info to show in header
+  resetButton?: React.ReactNode; // optional reset button to show in top left
 }
 
 const Planer: React.FC<PlanerProps> = ({
@@ -26,7 +28,9 @@ const Planer: React.FC<PlanerProps> = ({
   title = "Heutiger Ablauf",
   debug = true,
   showClock = true,
-  autoCenter = true
+  autoCenter = true,
+  displayInfo,
+  resetButton
 }) => {
   const currentTime = useClock(showClock);
 
@@ -57,6 +61,19 @@ const Planer: React.FC<PlanerProps> = ({
       {/* Torn edge */}
       <div className={styles.tornEdge} aria-hidden="true"></div>
 
+      {/* Reset button in top left */}
+      {resetButton && (
+        <div style={{
+          position: 'absolute',
+          top: '3.5rem',
+          left: '1rem',
+          zIndex: 20,
+          pointerEvents: 'auto'
+        }}>
+          {resetButton}
+        </div>
+      )}
+
       {debug && (
         <div className={styles.debugBanner} aria-label="Debug Modus Aktiv">
           <strong>DEBUG MODUS</strong> – Abdunkeln deaktiviert, Interaktionen aktiv
@@ -66,7 +83,10 @@ const Planer: React.FC<PlanerProps> = ({
         <div>
           <h1 className={styles.title}>{title}</h1>
           <p className={styles.date}>{date}</p>
-          {!showClock && (
+          {displayInfo && (
+            <p className={styles.time}>Display: {displayInfo}</p>
+          )}
+          {!showClock && !displayInfo && (
             <p className={styles.time}>Stand: {currentTime.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}</p>
           )}
         </div>

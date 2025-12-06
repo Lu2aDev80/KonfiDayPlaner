@@ -15,6 +15,7 @@ import {
 import FlipchartBackground from '../components/layout/FlipchartBackground';
 import { ConfirmModal } from '../components/ui';
 import TagManager from '../components/admin/TagManager';
+import DisplayManager from '../components/admin/DisplayManager';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../lib/api';
 import styles from './Admin.module.css';
@@ -834,6 +835,11 @@ const OrganisationSettings: React.FC = () => {
               description="Erstelle Tags um Termine in Tagesplänen zu kategorisieren und zu filtern."
             />
           </div>
+        )}
+
+        {/* Display Management */}
+        {isAdmin && orgId && (
+            <DisplayManager organisationId={orgId} />
         )}
 
         

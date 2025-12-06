@@ -23,6 +23,8 @@ import EventForm from "../components/forms/EventForm";
 import DayPlanForm from "../components/forms/DayPlanForm";
 import ScheduleManager from "../components/planner/ScheduleManager";
 import EventCreationWizard from "../components/forms/EventCreationWizard";
+import DevicePairingAdmin from "../components/admin/DevicePairingAdmin";
+import DisplayPairingModal from "../components/admin/DisplayPairingModal";
 import FlipchartBackground from "../components/layout/FlipchartBackground";
 import { ConfirmModal } from "../components/ui";
 import type { Event, DayPlan } from "../types/event";
@@ -56,6 +58,9 @@ const Dashboard: React.FC = () => {
     type: 'event' | 'dayPlan';
     id: string;
   }>({ isOpen: false, type: 'event', id: '' });
+
+  // Device pairing state
+  const [showDevicePairingModal, setShowDevicePairingModal] = useState(false);
 
   // UI state for improved overview
   const [searchQuery, setSearchQuery] = useState('');
@@ -588,6 +593,32 @@ const Dashboard: React.FC = () => {
           </div>
 
           <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+            <button
+              onClick={() => setShowDevicePairingModal(true)}
+              style={{
+                ...buttonStyle,
+                backgroundColor: "#fff",
+                color: "#8b5cf6",
+                border: "2px solid #8b5cf6",
+                boxShadow: "2px 4px 0 #8b5cf6",
+                padding: "clamp(0.5rem, 1.5vw, 0.75rem) clamp(0.75rem, 2vw, 1.5rem)",
+                fontSize: "clamp(0.875rem, 2vw, 0.95rem)",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-2px)";
+                e.currentTarget.style.boxShadow = "3px 6px 0 #8b5cf6";
+                e.currentTarget.style.backgroundColor = "#faf5ff";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow = "2px 4px 0 #8b5cf6";
+                e.currentTarget.style.backgroundColor = "#fff";
+              }}
+              title="Display koppeln"
+            >
+              <Plus size={18} />
+              <span style={{ display: window.innerWidth < 480 ? 'none' : 'inline' }}>Display</span>
+            </button>
             <button
               onClick={() => navigate(`/admin/settings?org=${orgId}`)}
               style={{
@@ -1755,6 +1786,13 @@ const Dashboard: React.FC = () => {
         confirmText="Löschen"
         cancelText="Abbrechen"
         type="error"
+      />
+
+      {/* Display Pairing Modal */}
+      <DisplayPairingModal
+        isOpen={showDevicePairingModal}
+        onClose={() => setShowDevicePairingModal(false)}
+        orgId={orgId || ''}
       />
     </div>
   );

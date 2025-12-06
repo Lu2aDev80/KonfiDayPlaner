@@ -174,7 +174,7 @@ const Home: React.FC = () => {
           </button>
 
           <button
-            onClick={() => navigate("/device-pairing")}
+            onClick={() => navigate("/register-display")}
             style={{
               padding: "clamp(0.875rem, 2.5vw, 1rem) clamp(1.5rem, 4vw, 2rem)",
               border: "2px solid #181818",

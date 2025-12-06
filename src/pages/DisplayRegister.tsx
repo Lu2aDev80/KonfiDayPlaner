@@ -292,12 +292,13 @@ const DisplayRegister: React.FC = () => {
                   boxShadow: '3px 6px 0 #181818'
                 }}>
                   <div style={{
-                    fontFamily: '"JetBrains Mono", "Courier New", monospace',
+                    fontFamily: 'monospace',
                     fontSize: 'clamp(2rem, 5vw, 3rem)',
                     fontWeight: '800',
                     color: '#0284c7',
                     letterSpacing: '0.2em',
-                    textAlign: 'center'
+                    textAlign: 'center',
+                    fontVariantNumeric: 'tabular-nums'
                   }}>
                     {displayCode || '------'}
                   </div>
