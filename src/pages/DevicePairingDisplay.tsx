@@ -95,14 +95,10 @@ const DevicePairingDisplay = () => {
 
 
   useEffect(() => {
-    // Connect to Socket.IO server - use absolute URL for websocket
-    // Extract the backend server URL from the current location
-    const protocol = window.location.protocol === 'https:' ? 'https:' : 'http:';
-    const host = window.location.hostname;
-    const port = window.location.port;
-    const socketUrl = port ? `${protocol}//${host}:3000` : `${protocol}//${host}`;
-    
-    const socket = io(socketUrl, {
+    // Connect to Socket.IO server using same origin (important for production)
+    // In dev: will connect to http://localhost:3000
+    // In prod: will connect to https://lu2adevelopment.de
+    const socket = io({
       transports: ['websocket', 'polling'],
       reconnection: true,
       reconnectionDelay: 1000,

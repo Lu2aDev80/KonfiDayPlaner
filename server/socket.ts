@@ -43,7 +43,10 @@ export function setupSocketIO(httpServer: HTTPServer) {
         process.env.DEV_ORIGIN || "http://localhost:5173",
         "http://localhost:5173",
         "http://localhost:5174",
-        process.env.FRONTEND_HOST || ""
+        process.env.FRONTEND_HOST || "",
+        // Production domains
+        "https://lu2adevelopment.de",
+        "https://www.lu2adevelopment.de"
       ].filter(Boolean),
       credentials: true
     }
