@@ -56,6 +56,9 @@ services:
     container_name: konfidayplaner-app
     labels:
       - "com.centurylinklabs.watchtower.enable=false"
+    depends_on:
+      api:
+        condition: service_healthy
     # Frontend does not need to wait for DB/API; Nginx can start independently
     ports:
       - '8080:80'
