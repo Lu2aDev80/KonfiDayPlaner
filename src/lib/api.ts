@@ -46,7 +46,12 @@ export type AcceptInvitationResponse = {
 };
 
 // Get API base URL from environment or use the base path for local development
-const API_BASE_URL = import.meta.env.VITE_API_URL;
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/minihackathon/api';
+
+// Log the API URL in development for debugging
+if (import.meta.env.DEV) {
+  console.log('API_BASE_URL:', API_BASE_URL);
+}
 
 async function json<T>(input: RequestInfo, init?: RequestInit): Promise<T> {
   const url = typeof input === 'string' ? `${API_BASE_URL}${input}` : input;
