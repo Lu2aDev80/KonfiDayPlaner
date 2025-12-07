@@ -23,7 +23,6 @@ import EventForm from "../components/forms/EventForm";
 import DayPlanForm from "../components/forms/DayPlanForm";
 import ScheduleManager from "../components/planner/ScheduleManager";
 import EventCreationWizard from "../components/forms/EventCreationWizard";
-import DevicePairingAdmin from "../components/admin/DevicePairingAdmin";
 import DisplayPairingModal from "../components/admin/DisplayPairingModal";
 import FlipchartBackground from "../components/layout/FlipchartBackground";
 import { ConfirmModal } from "../components/ui";
@@ -145,9 +144,9 @@ const Dashboard: React.FC = () => {
         id: created.id,
         name: created.name,
         description: created.description,
-        organizationId: orgId!,
-        createdAt: new Date(created.createdAt),
-        updatedAt: new Date(created.updatedAt),
+        organisationId: orgId!,
+        createdAt: created.createdAt,
+        updatedAt: created.updatedAt,
         dayPlans: [],
       }
       setEventsState([...events, newEvent])
@@ -164,7 +163,7 @@ const Dashboard: React.FC = () => {
 
     const updatedEvents = events.map((e) =>
       e.id === editingEvent.id
-        ? { ...e, ...eventData, updatedAt: new Date() }
+        ? { ...e, ...eventData, updatedAt: new Date().toISOString() }
         : e
     );
     setEventsState(updatedEvents);
@@ -198,7 +197,7 @@ const Dashboard: React.FC = () => {
     if (!selectedEvent) return;
     try {
       // Filter out client-side only properties and prepare schedule items for API
-      const scheduleForApi = dayPlanData.schedule?.map((item: any) => ({
+      const scheduleForApi = dayPlanData.scheduleItems?.map((item: any) => ({
         time: item.time || '09:00',
         type: item.type || 'session',
         title: item.title || '',
@@ -221,14 +220,14 @@ const Dashboard: React.FC = () => {
         eventId: selectedEvent.id,
         name: created.name,
         date: created.date,
-        schedule: (created.scheduleItems || []).map((si: any) => ({ id: si.id, time: si.time, type: si.type, title: si.title })),
-        createdAt: new Date(created.createdAt),
-        updatedAt: new Date(created.updatedAt),
+        scheduleItems: created.scheduleItems || [],
+        createdAt: created.createdAt,
+        updatedAt: created.updatedAt,
       }
 
       const updatedEvents = events.map((e) =>
         e.id === selectedEvent.id
-          ? { ...e, dayPlans: [...e.dayPlans, newDayPlan], updatedAt: new Date() }
+          ? { ...e, dayPlans: [...e.dayPlans, newDayPlan], updatedAt: new Date().toISOString() }
           : e
       );
       setEventsState(updatedEvents);
@@ -246,7 +245,7 @@ const Dashboard: React.FC = () => {
 
     try {
       // Filter out client-side only properties and prepare schedule items for API
-      const scheduleForApi = dayPlanData.schedule?.map((item: any) => ({
+      const scheduleForApi = dayPlanData.scheduleItems?.map((item: any) => ({
         time: item.time || '09:00',
         type: item.type || 'session',
         title: item.title || '',
@@ -274,17 +273,11 @@ const Dashboard: React.FC = () => {
                   ? { 
                       ...d, 
                       ...dayPlanData,
-                      schedule: (dayPlanData.schedule || []).map((item: any) => ({
-                        id: item.id,
-                        time: item.time,
-                        type: item.type,
-                        title: item.title
-                      })),
-                      updatedAt: new Date() 
+                      updatedAt: new Date().toISOString() 
                     }
                   : d
               ),
-              updatedAt: new Date(),
+              updatedAt: new Date().toISOString(),
             }
           : e
       );
@@ -314,7 +307,7 @@ const Dashboard: React.FC = () => {
           ? {
               ...e,
               dayPlans: e.dayPlans.filter((d) => d.id !== dayPlanId),
-              updatedAt: new Date(),
+              updatedAt: new Date().toISOString(),
             }
           : e
       );
@@ -392,10 +385,10 @@ const Dashboard: React.FC = () => {
             ...e,
             dayPlans: e.dayPlans.map((d) =>
               d.id === managingSchedule.id
-                ? { ...d, schedule, updatedAt: new Date() }
+                ? { ...d, scheduleItems: schedule, updatedAt: new Date().toISOString() }
                 : d
             ),
-            updatedAt: new Date(),
+            updatedAt: new Date().toISOString(),
           }
         : e
     );
@@ -410,7 +403,7 @@ const Dashboard: React.FC = () => {
   if (managingSchedule) {
     return (
       <ScheduleManager
-        schedule={managingSchedule.schedule}
+        schedule={managingSchedule.scheduleItems}
         onSave={handleSaveSchedule}
         onCancel={() => setManagingSchedule(null)}
       />
@@ -1383,7 +1376,7 @@ const Dashboard: React.FC = () => {
                                 }}>
                                   {new Date(dp.date).toLocaleDateString('de-DE', { day: '2-digit', month: 'short', year: 'numeric' })}
                                   {' • '}
-                                  {dp.schedule.length} Termin{dp.schedule.length !== 1 ? 'e' : ''}
+                                  {dp.scheduleItems.length} Termin{dp.scheduleItems.length !== 1 ? 'e' : ''}
                                 </div>
                               </div>
                             </div>
@@ -1622,8 +1615,8 @@ const Dashboard: React.FC = () => {
                               }}
                             >
                               <Calendar size={14} strokeWidth={2} />
-                              {dayPlan.schedule.length} Termin
-                              {dayPlan.schedule.length !== 1 ? "e" : ""}
+                              {dayPlan.scheduleItems.length} Termin
+                              {dayPlan.scheduleItems.length !== 1 ? "e" : ""}
                             </div>
                           </div>
                           <div

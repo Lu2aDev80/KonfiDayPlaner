@@ -358,7 +358,7 @@ const EventCreationWizard: React.FC<Props> = ({
           ...editingEvent,
           name: updated.name,
           description: updated.description,
-          updatedAt: new Date(updated.updatedAt)
+          updatedAt: updated.updatedAt
         };
         setCreatedEvent(updatedEvent);
         onCreated(updatedEvent);
@@ -370,9 +370,9 @@ const EventCreationWizard: React.FC<Props> = ({
         id: created.id,
         name: created.name,
         description: created.description,
-        organizationId,
-        createdAt: new Date(created.createdAt),
-        updatedAt: new Date(created.updatedAt),
+        organisationId: organizationId,
+        createdAt: created.createdAt,
+        updatedAt: created.updatedAt,
         dayPlans: []
       };
       setCreatedEvent(newEvent);
@@ -393,7 +393,7 @@ const EventCreationWizard: React.FC<Props> = ({
         const updated = await api.updateDayPlan(editingDayPlan.id, {
           name: dayPlanData.name,
           date: dayPlanData.date,
-          schedule: dayPlanData.schedule
+          schedule: dayPlanData.scheduleItems
         });
         
         const updatedDayPlan: DayPlan = {
@@ -401,21 +401,9 @@ const EventCreationWizard: React.FC<Props> = ({
           eventId: updated.eventId,
           name: updated.name,
           date: updated.date,
-          schedule: (updated.scheduleItems || []).map((si: any) => ({
-            id: si.id,
-            time: si.time,
-            type: si.type,
-            title: si.title,
-            speaker: si.speaker,
-            location: si.location,
-            details: si.details,
-            materials: si.materials,
-            duration: si.duration,
-            snacks: si.snacks,
-            facilitator: si.facilitator
-          })),
-          createdAt: new Date(updated.createdAt),
-          updatedAt: new Date(updated.updatedAt),
+          scheduleItems: updated.scheduleItems || [],
+          createdAt: updated.createdAt,
+          updatedAt: updated.updatedAt,
         };
         setCreatedDayPlan(updatedDayPlan);
         setCreatedEvent({ ...createdEvent, dayPlans: [updatedDayPlan] });
@@ -426,7 +414,7 @@ const EventCreationWizard: React.FC<Props> = ({
       const created = await api.createDayPlan(createdEvent.id, { 
         name: dayPlanData.name, 
         date: dayPlanData.date, 
-        schedule: dayPlanData.schedule 
+        schedule: dayPlanData.scheduleItems
       });
       
       const newDayPlan: DayPlan = {
@@ -434,21 +422,9 @@ const EventCreationWizard: React.FC<Props> = ({
         eventId: createdEvent.id,
         name: created.name,
         date: created.date,
-        schedule: (created.scheduleItems || []).map((si: any) => ({
-          id: si.id,
-          time: si.time,
-          type: si.type,
-          title: si.title,
-          speaker: si.speaker,
-          location: si.location,
-          details: si.details,
-          materials: si.materials,
-          duration: si.duration,
-          snacks: si.snacks,
-          facilitator: si.facilitator
-        })),
-        createdAt: new Date(created.createdAt),
-        updatedAt: new Date(created.updatedAt),
+        scheduleItems: created.scheduleItems || [],
+        createdAt: created.createdAt,
+        updatedAt: created.updatedAt,
       };
       setCreatedDayPlan(newDayPlan);
       setCreatedEvent({ ...createdEvent, dayPlans: [newDayPlan] });
@@ -471,21 +447,9 @@ const EventCreationWizard: React.FC<Props> = ({
         eventId: updated.eventId,
         name: updated.name,
         date: updated.date,
-        schedule: (updated.scheduleItems || []).map((si: any) => ({
-          id: si.id,
-          time: si.time,
-          type: si.type,
-          title: si.title,
-          speaker: si.speaker,
-          location: si.location,
-          details: si.details,
-          materials: si.materials,
-          duration: si.duration,
-          snacks: si.snacks,
-          facilitator: si.facilitator
-        })),
-        createdAt: new Date(updated.createdAt),
-        updatedAt: new Date(updated.updatedAt),
+        scheduleItems: updated.scheduleItems || [],
+        createdAt: updated.createdAt,
+        updatedAt: updated.updatedAt,
       };
       
       setCreatedDayPlan(updatedDayPlan);
@@ -710,7 +674,7 @@ const EventCreationWizard: React.FC<Props> = ({
                 
                 {/* Schedule Manager */}
                 <ScheduleManager
-                  schedule={(createdDayPlan || editingDayPlan)?.schedule || []}
+                  schedule={(createdDayPlan || editingDayPlan)?.scheduleItems || []}
                   onSave={handleSaveSchedule}
                   onCancel={() => setStep(1)}
                 />
@@ -768,7 +732,7 @@ const EventCreationWizard: React.FC<Props> = ({
                     </p>
                     
                     <button
-                      onClick={() => handleSaveSchedule((createdDayPlan || editingDayPlan)?.schedule || [])}
+                      onClick={() => handleSaveSchedule((createdDayPlan || editingDayPlan)?.scheduleItems || [])}
                       style={{
                         padding: '1.25rem 2.5rem',
                         border: '3px solid var(--color-ink)',

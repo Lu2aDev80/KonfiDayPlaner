@@ -3,13 +3,28 @@ import { useSearchParams } from 'react-router-dom';
 import Planer from '../components/planner/Planer';
 import type { ScheduleItem } from '../types/schedule';
 
+// Helper to create sample schedule items with required fields
+const createSampleItem = (partial: Partial<ScheduleItem>): ScheduleItem => ({
+  id: 0,
+  dayPlanId: 'sample',
+  position: 0,
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+  tags: [],
+  ...partial,
+  time: partial.time || '00:00',
+  type: partial.type || 'session',
+  title: partial.title || 'Untitled',
+});
+
 // Sample schedule for demo/development
 // Includes examples of time and position changes for demonstration
 const sampleSchedule: ScheduleItem[] = [
-  { id: 1, time: '08:45', type: 'announcement', title: 'Ankommen & Registrierung', details: 'Bitte Namensschild holen und Platz suchen.' },
-  { id: 2, time: '09:00', type: 'session', title: 'Begrüßung & Intro', speaker: 'Lea', location: 'Großer Raum', details: 'Kurzer Überblick über den Tag.' },
-  { 
+  createSampleItem({ id: 1, position: 0, time: '08:45', type: 'announcement', title: 'Ankommen & Registrierung', details: 'Bitte Namensschild holen und Platz suchen.' }),
+  createSampleItem({ id: 2, position: 1, time: '09:00', type: 'session', title: 'Begrüßung & Intro', speaker: 'Lea', location: 'Großer Raum', details: 'Kurzer Überblick über den Tag.' }),
+  createSampleItem({ 
     id: 3, 
+    position: 2,
     time: '09:20', 
     type: 'game', 
     title: 'Namensspiel', 
@@ -19,11 +34,12 @@ const sampleSchedule: ScheduleItem[] = [
     details: 'Schnelles Kennenlernspiel.',
     timeChanged: true,
     originalTime: '09:15'
-  },
-  { id: 4, time: '09:30', type: 'workshop', title: 'Kreative Karten', speaker: 'Mara', location: 'Werkraum', materials: 'Stifte, Bastelpapier', details: 'Gestalte eine persönliche Ermutigungskarte.' },
-  { id: 5, time: '10:15', type: 'break', title: 'Pause', duration: '15 Min', snacks: 'Kekse & Saft' },
-  { 
+  }),
+  createSampleItem({ id: 4, position: 3, time: '09:30', type: 'workshop', title: 'Kreative Karten', speaker: 'Mara', location: 'Werkraum', materials: 'Stifte, Bastelpapier', details: 'Gestalte eine persönliche Ermutigungskarte.' }),
+  createSampleItem({ id: 5, position: 4, time: '10:15', type: 'break', title: 'Pause', duration: '15 Min', snacks: 'Kekse & Saft' }),
+  createSampleItem({ 
     id: 6, 
+    position: 5,
     time: '10:45', 
     type: 'session', 
     title: 'Impuls: Vertrauen', 
@@ -34,22 +50,23 @@ const sampleSchedule: ScheduleItem[] = [
     originalTime: '10:30',
     positionChanged: true,
     originalPosition: 5
-  },
-  { 
+  }),
+  createSampleItem({ 
     id: 7, 
+    position: 6,
     time: '11:00', 
     type: 'transition', 
     title: 'Umbau / Vorbereitung Spiel',
     positionChanged: true,
     originalPosition: 6
-  },
-  { id: 8, time: '11:10', type: 'game', title: 'Teamchallenge Parcours', facilitator: 'Sarah', location: 'Außenbereich', materials: 'Seile, Hütchen', details: 'Kooperations-Challenge.' },
-  { id: 9, time: '11:45', type: 'announcement', title: 'Ansage: Ausflug nächste Woche', details: 'Treffpunkt 9:30 an der Kirche.' },
-  { id: 10, time: '11:50', type: 'break', title: 'Frühstück / Snack', duration: '20 Min', snacks: 'Obst & Müsliriegel' },
-  { id: 11, time: '12:10', type: 'workshop', title: 'Musik Jam', speaker: 'Ben', location: 'Musikraum', materials: 'Gitarren, Cajón', details: 'Offene Jam-Runde.' },
-  { id: 12, time: '12:45', type: 'session', title: 'Abschlussrunde', speaker: 'Lea', location: 'Großer Raum', details: 'Feedback & Gebet.' },
-  { id: 13, time: '13:00', type: 'transition', title: 'Aufräumen' },
-  { id: 14, time: '13:10', type: 'announcement', title: 'Ende / Verabschiedung', details: 'Dank & Hinweis auf Termin nächste Woche.' },
+  }),
+  createSampleItem({ id: 8, position: 7, time: '11:10', type: 'game', title: 'Teamchallenge Parcours', facilitator: 'Sarah', location: 'Außenbereich', materials: 'Seile, Hütchen', details: 'Kooperations-Challenge.' }),
+  createSampleItem({ id: 9, position: 8, time: '11:45', type: 'announcement', title: 'Ansage: Ausflug nächste Woche', details: 'Treffpunkt 9:30 an der Kirche.' }),
+  createSampleItem({ id: 10, position: 9, time: '11:50', type: 'break', title: 'Frühstück / Snack', duration: '20 Min', snacks: 'Obst & Müsliriegel' }),
+  createSampleItem({ id: 11, position: 10, time: '12:10', type: 'workshop', title: 'Musik Jam', speaker: 'Ben', location: 'Musikraum', materials: 'Gitarren, Cajón', details: 'Offene Jam-Runde.' }),
+  createSampleItem({ id: 12, position: 11, time: '12:45', type: 'session', title: 'Abschlussrunde', speaker: 'Lea', location: 'Großer Raum', details: 'Feedback & Gebet.' }),
+  createSampleItem({ id: 13, position: 12, time: '13:00', type: 'transition', title: 'Aufräumen' }),
+  createSampleItem({ id: 14, position: 13, time: '13:10', type: 'announcement', title: 'Ende / Verabschiedung', details: 'Dank & Hinweis auf Termin nächste Woche.' }),
 ];
 
 const PlannerPage: React.FC = () => {
@@ -80,19 +97,7 @@ const PlannerPage: React.FC = () => {
           
           if (dayPlan) {
             // Map scheduleItems to schedule format expected by Planer component
-            const newSchedule = (dayPlan.scheduleItems || []).map((item: any) => ({
-              id: item.id,
-              time: item.time,
-              type: item.type,
-              title: item.title,
-              speaker: item.speaker,
-              location: item.location,
-              details: item.details,
-              materials: item.materials,
-              duration: item.duration,
-              snacks: item.snacks,
-              facilitator: item.facilitator,
-            }));
+            const newSchedule = (dayPlan.scheduleItems || []).map((item: ScheduleItem) => item);
             
             const newTitle = dayPlan.name;
             const newDate = new Date(dayPlan.date).toLocaleDateString('de-DE', {

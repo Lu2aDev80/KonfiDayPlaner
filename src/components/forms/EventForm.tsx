@@ -24,7 +24,7 @@ const EventForm: React.FC<EventFormProps> = ({
     onSave({
       name: name.trim(),
       description: description.trim() || undefined,
-      organizationId
+      organisationId: organizationId
     });
   };
 

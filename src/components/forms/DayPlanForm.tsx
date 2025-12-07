@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, Calendar, ChevronRight } from 'lucide-react';
 import ScheduleManager from '../planner/ScheduleManager';
-import type { DayPlan, Event } from '../../types/event';
+import type { Event, DayPlan } from '../../types/event';
 import type { ScheduleItem } from '../../types/schedule';
 import styles from '../../pages/Admin.module.css';
 
@@ -21,7 +21,7 @@ const DayPlanForm: React.FC<DayPlanFormProps> = ({
   const [step, setStep] = useState<'basic' | 'schedule'>('basic');
   const [name, setName] = useState(dayPlan?.name || '');
   const [date, setDate] = useState(dayPlan?.date || new Date().toISOString().split('T')[0]);
-  const [schedule] = useState<ScheduleItem[]>(dayPlan?.schedule || []);
+  const [schedule] = useState<ScheduleItem[]>(dayPlan?.scheduleItems || []);
 
   const handleBasicSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,7 +35,7 @@ const DayPlanForm: React.FC<DayPlanFormProps> = ({
       eventId: event.id,
       name: name.trim(),
       date,
-      schedule: savedSchedule
+      scheduleItems: savedSchedule
     });
   };
 
