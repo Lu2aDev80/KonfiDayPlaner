@@ -104,7 +104,7 @@ const DevicePairingDisplay = () => {
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
       reconnectionAttempts: 5,
-      path: '/socket.io/'
+      path: '/minihackathon/socket.io/'
     });
 
     socketRef.current = socket;
