@@ -63,10 +63,22 @@ const AdminSignup: React.FC = () => {
       return;
     }
 
+    if (!acceptedTerms) {
+      openModal({ title: 'AGB & Datenschutz', message: 'Bitte akzeptiere die AGB und die Datenschutzerklärung, um fortzufahren.', type: 'warning' });
+      return;
+    }
+
     setSubmitting(true);
     try {
-      const data = await api.signup(form);
+      const payload = { ...form, acceptsTOS: true, acceptsPrivacy: true } as any;
+      const data = await api.signup(payload);
       setSignupResult(data);
+      // store acceptance locally if user id present
+      try {
+        if (data?.user?.id) {
+          localStorage.setItem(`accepted_terms_${data.user.id}`, 'true');
+        }
+      } catch {}
       setSignupSuccess(true);
     } catch (err: any) {
       openModal({
@@ -97,6 +109,8 @@ const AdminSignup: React.FC = () => {
     color: "#0f172a",
     marginBottom: "0.5rem",
   };
+
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   if (signupSuccess && signupResult) {
     return (
@@ -134,6 +148,12 @@ const AdminSignup: React.FC = () => {
               zIndex: 1,
             }}
           >
+            <div style={{ marginTop: '1rem', marginBottom: '1rem' }}>
+              <label style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                <input type="checkbox" checked={acceptedTerms} onChange={e => setAcceptedTerms(e.target.checked)} />
+                <span style={{ fontFamily: 'Inter, Roboto, sans-serif' }}>Ich akzeptiere die <a href="/agb" target="_blank" rel="noopener noreferrer">AGB</a> und die <a href="/dsgvo" target="_blank" rel="noopener noreferrer">Datenschutzerklärung</a>.</span>
+              </label>
+            </div>
             {/* Tape */}
             <div className={styles.tape} />
             

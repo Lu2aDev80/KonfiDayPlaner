@@ -11,7 +11,14 @@ import OrganisationSettings from "./pages/OrganisationSettings";
 import Documentation from "./pages/Documentation";
 import VerifyEmail from "./pages/VerifyEmail";
 import AcceptInvitation from "./pages/AcceptInvitation";
+
+
 import Footer from "./components/ui/Footer";
+import { CookieBanner } from "./components/ui";
+import Impressum from "./pages/Impressum";
+import AGB from "./pages/AGB";
+import DSGVO from "./pages/DSGVO";
+import TermsAccept from "./pages/TermsAccept";
 
 function App() {
   return (
@@ -30,9 +37,14 @@ function App() {
           <Route path="/admin/dashboard" element={<Dashboard />} />
           <Route path="/admin/settings" element={<OrganisationSettings />} />
           <Route path="/planner" element={<PlannerPage />} />
+          <Route path="/impressum" element={<Impressum />} />
+          <Route path="/agb" element={<AGB />} />
+          <Route path="/dsgvo" element={<DSGVO />} />
+          <Route path="/terms-accept" element={<TermsAccept />} />
         </Routes>
       </div>
       <Footer />
+      <CookieBanner />
     </div>
   );
 }

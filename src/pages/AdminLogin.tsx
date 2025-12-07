@@ -135,6 +135,23 @@ const AdminLogin: React.FC = () => {
         usernameOrEmail: credentials.username,
         password: credentials.password,
       });
+
+      // After successful login, ensure user accepted terms. Check via /auth/me and localStorage fallback.
+      try {
+        const me = await api.me();
+        const userId = me.user.id;
+        const acceptedKey = `accepted_terms_${userId}`;
+        const accepted = localStorage.getItem(acceptedKey) === 'true';
+        if (!accepted) {
+          // redirect to terms accept page with return location and userId
+          const redirect = encodeURIComponent(`/admin/dashboard?org=${selectedOrgId}`);
+          navigate(`/terms-accept?redirect=${redirect}&userId=${userId}`);
+          return;
+        }
+      } catch (err) {
+        // If me() fails, still proceed to dashboard
+      }
+
       navigate(`/admin/dashboard?org=${selectedOrgId}`, { replace: true });
     } catch (err: any) {
       const errorMessage = err.message || "Login fehlgeschlagen";

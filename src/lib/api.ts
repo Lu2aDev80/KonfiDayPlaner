@@ -183,11 +183,14 @@ export const api = {
       body: JSON.stringify({ email, organisationId }),
     });
   },
-  acceptInvitation(token: string, username: string, password: string): Promise<AcceptInvitationResponse> {
+  acceptInvitation(token: string, username: string, password: string, options?: { acceptsTOS?: boolean; acceptsPrivacy?: boolean }): Promise<AcceptInvitationResponse> {
+    const body: any = { token, username, password };
+    if (options?.acceptsTOS) body.acceptsTOS = true;
+    if (options?.acceptsPrivacy) body.acceptsPrivacy = true;
     return json<AcceptInvitationResponse>("/auth/accept-invitation", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token, username, password }),
+      body: JSON.stringify(body),
     });
   },
   validateInvitation(token: string): Promise<{valid: boolean; email: string; role: string; organisation: {id: string; name: string}}> {

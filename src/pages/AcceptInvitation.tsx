@@ -18,6 +18,7 @@ export default function AcceptInvitation() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [validating, setValidating] = useState(true);
   const [invitationData, setInvitationData] = useState<{email: string; role: string; organisation: {id: string; name: string}} | null>(null);
 
@@ -78,13 +79,25 @@ export default function AcceptInvitation() {
       return;
     }
 
+    if (!acceptedTerms) {
+      setError('Bitte akzeptiere die AGB und Datenschutzerklärung, um das Konto zu erstellen.');
+      return;
+    }
+
     setLoading(true);
     try {
-      const response = await api.acceptInvitation(token, username, password);
-      
+      const response = await api.acceptInvitation(token, username, password, { acceptsTOS: acceptedTerms, acceptsPrivacy: acceptedTerms });
+
       // Success! User is now logged in via session cookie
       console.log('Account created:', response);
-      
+
+      // Store acceptance locally for this user
+      if (response?.user?.id) {
+        try {
+          localStorage.setItem(`accepted_terms_${response.user.id}`, 'true');
+        } catch {}
+      }
+
       // Redirect to admin dashboard
       navigate('/admin/dashboard');
     } catch (err: any) {
@@ -711,6 +724,13 @@ export default function AcceptInvitation() {
                   {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
+            </div>
+
+            <div style={{ marginBottom: '1.25rem' }}>
+              <label style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                <input type="checkbox" checked={acceptedTerms} onChange={e => setAcceptedTerms(e.target.checked)} />
+                <span style={{ fontFamily: 'Inter, Roboto, sans-serif' }}>Ich akzeptiere die <a href="/agb" target="_blank" rel="noopener noreferrer">AGB</a> und die <a href="/dsgvo" target="_blank" rel="noopener noreferrer">Datenschutzerklärung</a>.</span>
+              </label>
             </div>
 
             <button

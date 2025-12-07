@@ -1,0 +1,50 @@
+.impressumWrapper {
+  min-height: 100vh;
+  background: repeating-linear-gradient(0deg, var(--color-paper) 0px, var(--color-paper) 39px, #e5e7eb 40px, var(--color-paper) 41px);
+  padding: 3.5rem 2.5rem 2.5rem 2.5rem;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow-x: hidden;
+  overflow-y: auto;
+  color: var(--color-ink);
+  box-sizing: border-box;
+}
+
+.impressumContent {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 2.5rem 2.5rem 2rem 2.5rem;
+  background: var(--color-paper);
+  border-radius: 1.5rem 1.5rem 1.2rem 1.2rem;
+  box-shadow: 0 4px 24px 0 rgba(0,0,0,0.09);
+  border: 2.5px solid var(--color-ink);
+  font-family: 'Gloria Hallelujah', 'Caveat', 'Comic Neue', cursive, sans-serif;
+  position: relative;
+}
+
+.impressumBackBtn {
+  position: absolute;
+  top: 1.2rem;
+  right: 1.2rem;
+  z-index: 2;
+}
+
+@media (max-width: 1024px) {
+  .impressumWrapper {
+    padding: 2.5rem 1.75rem 1.75rem 1.75rem;
+  }
+  .impressumContent {
+    padding: 2.25rem 2.25rem 1.75rem 2.25rem;
+    border: 2px solid var(--color-ink);
+  }
+}
+
+@media (max-width: 768px) {
+  .impressumWrapper {
+    padding: 2rem 1.25rem 1.25rem 1.25rem;
+  }
+  .impressumContent {
+    padding: 1.5rem 1rem 1rem 1rem;
+  }
+}
