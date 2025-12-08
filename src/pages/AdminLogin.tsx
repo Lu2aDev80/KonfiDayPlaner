@@ -456,41 +456,62 @@ const AdminLogin: React.FC = () => {
                     }
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1 }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.75rem",
+                      flex: 1,
+                    }}
+                  >
                     {org.logoUrl ? (
                       <img
-                        src={org.logoUrl.startsWith('http') ? org.logoUrl : `/minihackathon${org.logoUrl}`}
+                        src={
+                          org.logoUrl.startsWith("http")
+                            ? org.logoUrl
+                            : `/minihackathon${org.logoUrl}`
+                        }
                         alt={`${org.name} Logo`}
                         style={{
-                          width: '24px',
-                          height: '24px',
-                          objectFit: 'contain',
-                          borderRadius: '4px',
-                          flexShrink: 0
+                          width: "24px",
+                          height: "24px",
+                          objectFit: "contain",
+                          borderRadius: "4px",
+                          flexShrink: 0,
                         }}
                         onError={(e) => {
                           // Fallback to Users icon if image fails
-                          e.currentTarget.style.display = 'none';
-                          const userIcon = e.currentTarget.parentElement?.querySelector('.fallback-icon') as HTMLElement;
-                          if (userIcon) userIcon.style.display = 'block';
+                          e.currentTarget.style.display = "none";
+                          const userIcon =
+                            e.currentTarget.parentElement?.querySelector(
+                              ".fallback-icon"
+                            ) as HTMLElement;
+                          if (userIcon) userIcon.style.display = "block";
                         }}
                       />
                     ) : null}
-                    <Users 
-                      size={20} 
-                      strokeWidth={2} 
+                    <Users
+                      size={20}
+                      strokeWidth={2}
                       className="fallback-icon"
-                      style={{ display: org.logoUrl ? 'none' : 'block' }}
+                      style={{ display: org.logoUrl ? "none" : "block" }}
                     />
                     <div style={{ textAlign: "left", flex: 1 }}>
-                      <div style={{ fontWeight: "700", marginBottom: "0.25rem", fontSize: "clamp(0.9rem, 2.25vw, 1rem)" }}>
+                      <div
+                        style={{
+                          fontWeight: "700",
+                          marginBottom: "0.25rem",
+                          fontSize: "clamp(0.9rem, 2.25vw, 1rem)",
+                        }}
+                      >
                         {org.name}
                       </div>
                       <div
                         style={{
                           fontSize: "clamp(0.8rem, 2vw, 0.9rem)",
                           fontWeight: "500",
-                          color: selectedOrgId === org.id ? "#e5e7eb" : "#64748b",
+                          color:
+                            selectedOrgId === org.id ? "#e5e7eb" : "#64748b",
                         }}
                       >
                         {org.description || ""}
@@ -733,32 +754,39 @@ const AdminLogin: React.FC = () => {
         </button>
 
         {/* Debug Status Panel */}
-        <div style={{
-          position: 'fixed',
-          bottom: '20px',
-          left: '20px',
-          background: dbStatus.api && dbStatus.db ? '#10b981' : '#ef4444',
-          color: 'white',
-          padding: '12px 16px',
-          borderRadius: '8px',
-          fontSize: '0.75rem',
-          fontFamily: 'monospace',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-          border: '2px solid rgba(255,255,255,0.2)',
-          minWidth: '200px',
-          zIndex: 999
-        }}>
-          <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>🔧 Debug Status</div>
-          <div>API: {dbStatus.loading ? '⏳' : dbStatus.api ? '✅' : '❌'}</div>
-          <div>DB: {dbStatus.loading ? '⏳' : dbStatus.db ? '✅' : '❌'}</div>
+        <div
+          style={{
+            position: "fixed",
+            bottom: "20px",
+            left: "20px",
+            background: dbStatus.api && dbStatus.db ? "#10b981" : "#ef4444",
+            color: "white",
+            padding: "12px 16px",
+            borderRadius: "8px",
+            fontSize: "0.75rem",
+            fontFamily: "monospace",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+            border: "2px solid rgba(255,255,255,0.2)",
+            minWidth: "200px",
+            zIndex: 999,
+            display: "none",
+          }}
+        >
+          <div style={{ fontWeight: "bold", marginBottom: "4px" }}>
+            🔧 Debug Status
+          </div>
+          <div>API: {dbStatus.loading ? "⏳" : dbStatus.api ? "✅" : "❌"}</div>
+          <div>DB: {dbStatus.loading ? "⏳" : dbStatus.db ? "✅" : "❌"}</div>
           {dbStatus.lastCheck && (
-            <div style={{ fontSize: '0.65rem', opacity: 0.8, marginTop: '4px' }}>
+            <div
+              style={{ fontSize: "0.65rem", opacity: 0.8, marginTop: "4px" }}
+            >
               Letzter Check: {dbStatus.lastCheck}
             </div>
           )}
           <button
             onClick={async () => {
-              setDbStatus(prev => ({ ...prev, loading: true }));
+              setDbStatus((prev) => ({ ...prev, loading: true }));
               try {
                 await api.health();
                 const data = await api.organisations();
@@ -767,7 +795,7 @@ const AdminLogin: React.FC = () => {
                   api: true,
                   db: true,
                   loading: false,
-                  lastCheck: new Date().toLocaleTimeString('de-DE')
+                  lastCheck: new Date().toLocaleTimeString("de-DE"),
                 });
                 setError(null);
               } catch (error: any) {
@@ -776,20 +804,20 @@ const AdminLogin: React.FC = () => {
                   api: false,
                   db: false,
                   loading: false,
-                  lastCheck: new Date().toLocaleTimeString('de-DE')
+                  lastCheck: new Date().toLocaleTimeString("de-DE"),
                 });
               }
             }}
             style={{
-              background: 'rgba(255,255,255,0.2)',
-              border: '1px solid rgba(255,255,255,0.3)',
-              color: 'white',
-              padding: '4px 8px',
-              borderRadius: '4px',
-              fontSize: '0.65rem',
-              cursor: 'pointer',
-              marginTop: '8px',
-              width: '100%'
+              background: "rgba(255,255,255,0.2)",
+              border: "1px solid rgba(255,255,255,0.3)",
+              color: "white",
+              padding: "4px 8px",
+              borderRadius: "4px",
+              fontSize: "0.65rem",
+              cursor: "pointer",
+              marginTop: "8px",
+              width: "100%",
             }}
           >
             🔄 Erneut prüfen
@@ -830,7 +858,7 @@ const AdminLogin: React.FC = () => {
 
         {/* Modals */}
         <ConfirmModal
-          isOpen={modalState.type === 'confirm-resend'}
+          isOpen={modalState.type === "confirm-resend"}
           onClose={closeModal}
           onConfirm={() => handleResendVerification(modalState.userEmail)}
           title={modalState.title}
@@ -841,7 +869,7 @@ const AdminLogin: React.FC = () => {
         />
 
         <AlertModal
-          isOpen={modalState.type === 'alert'}
+          isOpen={modalState.type === "alert"}
           onClose={closeModal}
           title={modalState.title}
           message={modalState.message}
@@ -849,60 +877,72 @@ const AdminLogin: React.FC = () => {
         />
 
         <Modal
-          isOpen={modalState.type === 'resend-email'}
+          isOpen={modalState.type === "resend-email"}
           onClose={closeModal}
           title={modalState.title}
           type="info"
         >
-          <p style={{
-            fontFamily: '"Inter", "Roboto", Arial, sans-serif',
-            fontSize: '1rem',
-            color: '#475569',
-            lineHeight: '1.6',
-            marginBottom: '1rem',
-          }}>
+          <p
+            style={{
+              fontFamily: '"Inter", "Roboto", Arial, sans-serif',
+              fontSize: "1rem",
+              color: "#475569",
+              lineHeight: "1.6",
+              marginBottom: "1rem",
+            }}
+          >
             {modalState.message}
           </p>
-          <form onSubmit={(e) => {
-            e.preventDefault();
-            const email = (e.currentTarget.elements.namedItem('email') as HTMLInputElement).value;
-            if (email) {
-              closeModal();
-              handleResendVerification(email);
-            }
-          }}>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              const email = (
+                e.currentTarget.elements.namedItem("email") as HTMLInputElement
+              ).value;
+              if (email) {
+                closeModal();
+                handleResendVerification(email);
+              }
+            }}
+          >
             <input
               type="email"
               name="email"
               required
               placeholder="deine-email@beispiel.de"
               style={{
-                width: '100%',
-                padding: '0.75rem',
-                border: '2px solid #374151',
-                borderRadius: '8px',
-                fontSize: '1rem',
+                width: "100%",
+                padding: "0.75rem",
+                border: "2px solid #374151",
+                borderRadius: "8px",
+                fontSize: "1rem",
                 fontFamily: '"Inter", "Roboto", Arial, sans-serif',
-                marginBottom: '1rem',
-                boxSizing: 'border-box',
+                marginBottom: "1rem",
+                boxSizing: "border-box",
               }}
             />
-            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+            <div
+              style={{
+                display: "flex",
+                gap: "0.75rem",
+                justifyContent: "flex-end",
+              }}
+            >
               <button
                 type="button"
                 onClick={closeModal}
                 style={{
-                  padding: '0.75rem 1.5rem',
-                  border: '2px solid #64748b',
-                  borderRadius: '8px',
-                  fontSize: '1rem',
-                  fontWeight: '600',
+                  padding: "0.75rem 1.5rem",
+                  border: "2px solid #64748b",
+                  borderRadius: "8px",
+                  fontSize: "1rem",
+                  fontWeight: "600",
                   fontFamily: '"Inter", "Roboto", Arial, sans-serif',
-                  backgroundColor: '#fff',
-                  color: '#64748b',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  boxShadow: '2px 4px 0 #64748b',
+                  backgroundColor: "#fff",
+                  color: "#64748b",
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                  boxShadow: "2px 4px 0 #64748b",
                 }}
               >
                 Abbrechen
@@ -910,17 +950,17 @@ const AdminLogin: React.FC = () => {
               <button
                 type="submit"
                 style={{
-                  padding: '0.75rem 1.5rem',
-                  border: '2px solid #181818',
-                  borderRadius: '8px',
-                  fontSize: '1rem',
-                  fontWeight: '600',
+                  padding: "0.75rem 1.5rem",
+                  border: "2px solid #181818",
+                  borderRadius: "8px",
+                  fontSize: "1rem",
+                  fontWeight: "600",
                   fontFamily: '"Inter", "Roboto", Arial, sans-serif',
-                  backgroundColor: '#fbbf24',
-                  color: '#fff',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  boxShadow: '2px 4px 0 #181818',
+                  backgroundColor: "#fbbf24",
+                  color: "#fff",
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                  boxShadow: "2px 4px 0 #181818",
                 }}
               >
                 Senden

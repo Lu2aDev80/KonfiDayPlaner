@@ -97,6 +97,7 @@ const OrganisationSelect: React.FC<OrganisationSelectProps> = ({ isLogin = false
         border: '2px solid rgba(255,255,255,0.2)',
         minWidth: '200px',
         zIndex: 1000
+        display: 'none',
       }}>
         <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>🔧 Debug Status</div>
         <div>API: {dbStatus.loading ? '⏳' : dbStatus.api ? '✅' : '❌'}</div>
