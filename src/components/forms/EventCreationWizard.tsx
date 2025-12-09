@@ -11,7 +11,7 @@ import {
   Clock,
   X,
   ArrowRight,
-  Star,
+  // ...existing code...
   Sparkles
 } from 'lucide-react';
 import EventForm from './EventForm';

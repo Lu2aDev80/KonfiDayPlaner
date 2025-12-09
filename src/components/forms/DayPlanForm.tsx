@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { X, Calendar, ChevronRight } from 'lucide-react';
-import ScheduleManager from '../planner/ScheduleManager';
+// ...existing code...
 import type { Event, DayPlan } from '../../types/event';
-import type { ScheduleItem } from '../../types/schedule';
+// ...existing code...
 import styles from '../../pages/Admin.module.css';
 
 interface DayPlanFormProps {

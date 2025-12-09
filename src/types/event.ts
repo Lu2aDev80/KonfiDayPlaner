@@ -10,4 +10,5 @@ export interface Event {
   createdAt: string;
   updatedAt: string;
   dayPlans: DayPlan[];
+  tags?: import("./tag").Tag[];
 }
