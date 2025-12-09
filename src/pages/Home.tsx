@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { LogIn, Monitor, Calendar, BookOpen } from "lucide-react";
+import ActionButton from "../components/ui/ActionButton";
 import FlipchartBackground from "../components/layout/FlipchartBackground";
 import styles from "./Admin.module.css";
 import chaosOpsLogo from "../assets/Chaos-Ops Logo.png";
@@ -137,147 +138,41 @@ const Home: React.FC = () => {
             margin: "0 auto",
           }}
         >
-          <button
+            <ActionButton
             onClick={() => navigate("/login")}
-            style={{
-              padding: "clamp(0.875rem, 2.5vw, 1rem) clamp(1.5rem, 4vw, 2rem)",
-              border: "2px solid #181818",
-              borderRadius: "8px",
-              fontSize: "clamp(1rem, 2.5vw, 1.1rem)",
-              fontWeight: "700",
-              fontFamily: '"Inter", "Roboto", Arial, sans-serif',
-              backgroundColor: "#fbbf24",
-              color: "#fff",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "0.75rem",
-              transition: "all 0.2s ease",
-              boxShadow: "2px 4px 0 #181818",
-              textShadow: "0 1px 2px rgba(0,0,0,0.2)",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-2px)";
-              e.currentTarget.style.boxShadow = "3px 6px 0 #181818";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow = "2px 4px 0 #181818";
-            }}
-          >
-            <LogIn size={20} />
+              icon={<LogIn size={20} />}
+              color="#fbbf24"
+            >
             Zum Verwalten Anmelden
-          </button>
+            </ActionButton>
 
-          <button
+            <ActionButton
             onClick={() => navigate("/register-display")}
-            style={{
-              padding: "clamp(0.875rem, 2.5vw, 1rem) clamp(1.5rem, 4vw, 2rem)",
-              border: "2px solid #181818",
-              borderRadius: "8px",
-              fontSize: "clamp(1rem, 2.5vw, 1.1rem)",
-              fontWeight: "700",
-              fontFamily: '"Inter", "Roboto", Arial, sans-serif',
-              backgroundColor: "#38bdf8",
-              color: "#fff",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "0.75rem",
-              transition: "all 0.2s ease",
-              boxShadow: "2px 4px 0 #181818",
-              textShadow: "0 1px 2px rgba(0,0,0,0.2)",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-2px)";
-              e.currentTarget.style.boxShadow = "3px 6px 0 #181818";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow = "2px 4px 0 #181818";
-            }}
-          >
-            <Monitor size={20} />
+              icon={<Monitor size={20} />}
+              color="#38bdf8"
+            >
             Display Pairing Code
-          </button>
+            </ActionButton>
 
-          <button
+            <ActionButton
             onClick={() => navigate("/documentation")}
-            style={{
-              padding: "clamp(0.875rem, 2.5vw, 1rem) clamp(1.5rem, 4vw, 2rem)",
-              border: "2px solid #181818",
-              borderRadius: "8px",
-              fontSize: "clamp(1rem, 2.5vw, 1.1rem)",
-              fontWeight: "700",
-              fontFamily: '"Inter", "Roboto", Arial, sans-serif',
-              backgroundColor: "#a78bfa",
-              color: "#fff",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "0.75rem",
-              transition: "all 0.2s ease",
-              boxShadow: "2px 4px 0 #181818",
-              textShadow: "0 1px 2px rgba(0,0,0,0.2)",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-2px)";
-              e.currentTarget.style.boxShadow = "3px 6px 0 #181818";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow = "2px 4px 0 #181818";
-            }}
-          >
-            <BookOpen size={20} />
+              icon={<BookOpen size={20} />}
+              color="#a78bfa"
+            >
             Dokumentation
-          </button>
+            </ActionButton>
 
 
 
           {/* Development Test Button */}
-          <button
+            <ActionButton
             onClick={() => navigate("/planner")}
-            style={{
-              padding: "clamp(0.875rem, 2.5vw, 1rem) clamp(1.5rem, 4vw, 2rem)",
-              border: "2px dashed #181818",
-              borderRadius: "8px",
-              fontSize: "clamp(0.98rem, 2.25vw, 1.08rem)",
-              fontWeight: "600",
-              fontFamily: '"Inter", "Roboto", Arial, sans-serif',
-              backgroundColor: "#10b981",
-              color: "#fff",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "0.75rem",
-              transition: "all 0.2s ease",
-              boxShadow: "2px 4px 0 #181818",
-              textShadow: "0 1px 2px rgba(0,0,0,0.2)",
-              opacity: "0.95",
-              position: "relative",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-2px)";
-              e.currentTarget.style.boxShadow = "3px 6px 0 #181818";
-              e.currentTarget.style.opacity = "1";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow = "2px 4px 0 #181818";
-              e.currentTarget.style.opacity = "0.95";
-            }}
+              icon={<Calendar size={18} />}
+              color="#10b981"
+              borderStyle="dashed"
+              extraStyles={{ fontWeight: 600, fontSize: "clamp(0.98rem, 2.25vw, 1.08rem)", opacity: 0.95 }}
             title="Demo-Modus ausprobieren"
-          >
-            <Calendar size={18} />
-            Demo ausprobieren
-            <span
-              style={{
-                marginLeft: '0.7rem',
+              badge={<span style={{
                 backgroundColor: '#fbbf24',
                 color: '#18181b',
                 fontSize: '0.78rem',
@@ -289,11 +184,10 @@ const Home: React.FC = () => {
                 boxShadow: '0 1px 4px #fbbf2433',
                 lineHeight: 1.1,
                 alignSelf: 'center',
-              }}
+              }}>Demo Planer</span>}
             >
-              Demo Planer
-            </span>
-          </button>
+              Demo ausprobieren
+            </ActionButton>
         </div>
         </div>
 
