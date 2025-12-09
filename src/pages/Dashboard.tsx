@@ -1049,9 +1049,13 @@ const Dashboard: React.FC = () => {
           delayActive={delayActive}
           onDelay={() => setDelayActive((prev) => !prev)}
           onSendUpdate={() => window.alert("Änderungen wurden live gesendet!")}
-          displayName={"Demo-Display"}
+          displays={[
+            { id: "1", name: "Display 1" },
+            { id: "2", name: "Display 2" }
+          ]} // TODO: Ersetze durch echte Display-Liste aus State
           planName={selectedEvent?.dayPlans?.[0]?.name || ""}
           eventName={selectedEvent?.name || ""}
+          compactMode={viewMode === 'compact'}
         />
 
         {/* Add spacing between live controls and Veranstaltungen */}

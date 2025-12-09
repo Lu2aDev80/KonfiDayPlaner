@@ -3,14 +3,20 @@ import { Clock, Edit2, Pen, Send } from "lucide-react";
 import styles from "../../pages/Admin.module.css";
 import ActionButton from "../ui/ActionButton";
 
+interface DisplayInfo {
+  id: string;
+  name: string;
+}
+
 interface LivePlanControlProps {
   isConnected: boolean;
   onDelay: () => void;
   onSendUpdate: () => void;
   delayActive: boolean;
-  displayName?: string;
+  displays?: DisplayInfo[];
   planName?: string;
   eventName?: string;
+  compactMode?: boolean;
 }
 
 const cardStyle = {
@@ -28,41 +34,57 @@ const LivePlanControl: React.FC<LivePlanControlProps> = ({
   onDelay,
   onSendUpdate,
   delayActive,
-  displayName,
+  displays = [],
   planName,
   eventName,
+  compactMode = false,
 }) => {
   if (!isConnected) return null;
   return (
-    <div style={cardStyle}>
+    <div style={{
+      ...cardStyle,
+      padding: compactMode ? "1rem" : "2rem",
+      minWidth: compactMode ? "260px" : "340px",
+      fontSize: compactMode ? "0.95rem" : "1.1rem",
+    }}>
       <div className={styles.tape} />
-      <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "1rem", justifyContent: "space-between" }}>          <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          <Clock size={28} color="#f59e0b" />
-          <span style={{ fontWeight: 700, fontSize: "1.1rem", color: "#78350f" }}>
-            Live-Plan Steuerung
-          </span>
+      <div style={{ display: "flex", flexDirection: "column", gap: compactMode ? "0.3rem" : "0.5rem" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "1rem", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+            <Clock size={compactMode ? 20 : 28} color="#f59e0b" />
+            <span style={{ fontWeight: 700, fontSize: compactMode ? "1rem" : "1.1rem", color: "#78350f" }}>
+              Live-Plan Steuerung
+            </span>
+          </div>
+          {!compactMode && (
+            <ActionButton
+              onClick={() => navigate("/documentation")}
+              icon={<Pen size={20} />}
+              color="#fa3f48ff"
+            >
+              Live Plan Bearbeiten
+            </ActionButton>
+          )}
         </div>
-          <ActionButton
-            onClick={() => navigate("/documentation")}
-            icon={<Pen size={20} />}
-            color="#fa3f48ff"
-          >
-            Live Plan Bearbeiten
-          </ActionButton>
-        </div>
-        {displayName && (
-          <div style={{ fontSize: "1rem", color: "#78350f", fontWeight: 600 }}>
-            Display: {displayName}
+        {displays.length > 0 && (
+          <div style={{ fontSize: compactMode ? "0.95rem" : "1rem", color: "#78350f", fontWeight: 600 }}>
+            Verbundene Displays:
+            <ul style={{ margin: "0.3rem 0 0 0.5rem", padding: 0 }}>
+              {displays.map((d) => (
+                <li key={d.id} style={{ listStyle: "disc", marginLeft: "1rem" }}>
+                  {d.name}
+                </li>
+              ))}
+            </ul>
           </div>
         )}
         {planName && (
-          <div style={{ fontSize: "1rem", color: "#78350f", fontWeight: 600 }}>
+          <div style={{ fontSize: compactMode ? "0.95rem" : "1rem", color: "#78350f", fontWeight: 600 }}>
             Plan: {planName}
           </div>
         )}
         {eventName && (
-          <div style={{ fontSize: "1rem", color: "#78350f", fontWeight: 600 }}>
+          <div style={{ fontSize: compactMode ? "0.95rem" : "1rem", color: "#78350f", fontWeight: 600 }}>
             Veranstaltung: {eventName}
           </div>
         )}
