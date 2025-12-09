@@ -1,7 +1,9 @@
 import React from 'react';
 import styles from '../planner/Planer.module.css';
+
 import { PenLine } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { appConfig } from '../../constants/appConfig';
 
 const Footer: React.FC = () => (
     <footer
@@ -19,7 +21,7 @@ const Footer: React.FC = () => (
             paddingTop: '0.5rem',
         }}
     >
-        <div style={{ cursor: 'pointer' }} onClick={() => window.location.href = '/'}>
+        <div style={{ cursor: 'pointer' }} onClick={() => window.location.href = appConfig.footerLink}>
             <span className={styles.footerIcon} aria-hidden="true"><PenLine size={20} /></span>
             <span style={{ fontWeight: 700, letterSpacing: '0.01em' }}>Chaos Ops. Organisiere, Plane, Zeige!</span>
         </div>

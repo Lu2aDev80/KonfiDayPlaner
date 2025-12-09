@@ -14,14 +14,17 @@ import AcceptInvitation from "./pages/AcceptInvitation";
 
 
 import Footer from "./components/ui/Footer";
+
 import { CookieBanner } from "./components/ui";
 import Impressum from "./pages/Impressum";
 import AGB from "./pages/AGB";
 import DSGVO from "./pages/DSGVO";
 import Error404 from "./pages/Error404";
 import TermsAccept from "./pages/TermsAccept";
+import { useLastNonLegalRouteTracker } from './hooks/useLastNonLegalRoute';
 
 function App() {
+  useLastNonLegalRouteTracker();
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>

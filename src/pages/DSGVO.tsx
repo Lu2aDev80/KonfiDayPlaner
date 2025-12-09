@@ -1,49 +1,122 @@
+
+
 import React from 'react';
+import { BackButton } from '../components/ui';
+import { getLastNonLegalRoute } from '../hooks/useLastNonLegalRoute';
+import FlipchartBackground from '../components/layout/FlipchartBackground';
+import styles from './Admin.module.css';
+
 
 const DSGVO: React.FC = () => (
-  <div style={{ maxWidth: 900, margin: '2rem auto', padding: '2.5rem', background: 'var(--color-paper)', color: 'var(--color-ink)', borderRadius: 12, border: '2px solid var(--color-ink)', boxShadow: '0 4px 24px rgba(0,0,0,0.08)', fontFamily: '"Inter", "Roboto", Arial, sans-serif' }}>
-    <h1>Datenschutzerklärung (DSGVO)</h1>
-    <p>Stand: Dezember 2025</p>
+  <div className={styles.adminWrapper}>
+    <FlipchartBackground />
+    <main className={styles.adminContent} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2rem', padding: '2rem 1rem', maxWidth: '900px', margin: '0 auto' }}>
+      <div style={{
+        background: '#fff',
+        borderRadius: '1.2rem 1.35rem 1.15rem 1.25rem',
+        boxShadow: '2px 4px 0 #e5e7eb, 0 2px 8px 0 rgba(0,0,0,0.08)',
+        padding: '2rem',
+        border: '2px solid #181818',
+        width: '100%',
+        position: 'relative',
+        transform: 'rotate(-0.3deg)',
+        zIndex: 1
+      }}>
+        <div className={styles.tape} />
+        <span style={{ position: 'absolute', top: 16, left: 16, zIndex: 2 }}>
+          <BackButton iconOnly to={getLastNonLegalRoute()} />
+        </span>
+        <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+          <h1 style={{
+            fontFamily: '"Gloria Hallelujah", "Caveat", "Comic Neue", cursive, sans-serif',
+            fontSize: 'clamp(2rem, 5vw, 2.5rem)',
+            fontWeight: 800,
+            color: '#181818',
+            marginBottom: '0.5rem',
+            letterSpacing: '0.01em',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.5rem'
+          }}>
+            Datenschutzerklärung (DSGVO)
+          </h1>
+          <p style={{ fontFamily: '"Inter", "Roboto", Arial, sans-serif', fontSize: '1.1rem', color: '#4a5568', lineHeight: '1.6' }}>Stand: Dezember 2025</p>
+          <div
+            style={{
+              fontFamily: '"Inter", "Roboto", Arial, sans-serif',
+              color: '#181818',
+              textAlign: 'left',
+              margin: '2.5rem auto 0 auto',
+              maxWidth: 700,
+              lineHeight: 1.7,
+              fontSize: '1.08rem',
+            }}
+          >
+            <p style={{ marginBottom: '2.2rem', fontSize: '1.13rem' }}>
+              Wir nehmen den Schutz deiner personenbezogenen Daten ernst.<br />
+              Diese Erklärung beschreibt, welche Daten wir sammeln, wofür wir sie verwenden und welche Rechte du hast.
+            </p>
 
-    <p>
-      Wir nehmen den Schutz deiner personenbezogenen Daten ernst. Diese Erklärung beschreibt, welche Daten wir sammeln, wofür wir sie verwenden und welche Rechte du hast.
-    </p>
+            <div style={{ marginBottom: '2.2rem' }}>
+              <h3 style={{ margin: '2.2rem 0 0.7rem 0', fontSize: '1.18rem', color: '#1a202c', fontWeight: 700, letterSpacing: '0.01em' }}>1. Verantwortlicher</h3>
+              <div style={{ paddingLeft: '0.5rem' }}>
+                Verantwortlich für die Datenverarbeitung ist:<br />
+                <span style={{ fontWeight: 600 }}>Luca Steinhagen</span> (Kontakt: <a href="mailto:info@lu2adevelopment.de" style={{ color: '#2563eb', textDecoration: 'underline' }}>info@lu2adevelopment.de</a>).
+              </div>
+            </div>
 
-    <h3>1. Verantwortlicher</h3>
-    <p>
-      Verantwortlich für die Datenverarbeitung ist: Luca Steinhagen (Kontakt: info@lu2adevelopment.de).
-    </p>
+            <div style={{ marginBottom: '2.2rem' }}>
+              <h3 style={{ margin: '2.2rem 0 0.7rem 0', fontSize: '1.18rem', color: '#1a202c', fontWeight: 700, letterSpacing: '0.01em' }}>2. Welche Daten wir verarbeiten</h3>
+              <ul style={{ margin: 0, paddingLeft: '1.2rem', listStyle: 'disc' }}>
+                <li>Registrierungsdaten (Name, E-Mail, Benutzername)</li>
+                <li>Organisationsdaten (Name, Beschreibung, ggf. Logo)</li>
+                <li>Nutzungsdaten (Einstellungen, Login-Zeiten)</li>
+              </ul>
+            </div>
 
-    <h3>2. Welche Daten wir verarbeiten</h3>
-    <p>
-      - Registrierungsdaten (Name, E-Mail, Benutzername)
-      <br />- Organisationsdaten (Name, Beschreibung, ggf. Logo)
-      <br />- Nutzungsdaten (Einstellungen, Login-Zeiten)
-    </p>
+            <div style={{ marginBottom: '2.2rem' }}>
+              <h3 style={{ margin: '2.2rem 0 0.7rem 0', fontSize: '1.18rem', color: '#1a202c', fontWeight: 700, letterSpacing: '0.01em' }}>3. Zweck der Verarbeitung</h3>
+              <div style={{ paddingLeft: '0.5rem' }}>
+                Die Datenverarbeitung erfolgt zur Bereitstellung und Verbesserung des Dienstes,<br />
+                zur Authentifizierung, Benachrichtigung (E-Mails) und zur Erfüllung vertraglicher Pflichten.
+              </div>
+            </div>
 
-    <h3>3. Zweck der Verarbeitung</h3>
-    <p>
-      Die Datenverarbeitung erfolgt zur Bereitstellung und Verbesserung des Dienstes, zur Authentifizierung, Benachrichtigung (E-Mails) und zur Erfüllung vertraglicher Pflichten.
-    </p>
+            <div style={{ marginBottom: '2.2rem' }}>
+              <h3 style={{ margin: '2.2rem 0 0.7rem 0', fontSize: '1.18rem', color: '#1a202c', fontWeight: 700, letterSpacing: '0.01em' }}>4. Rechtsgrundlage</h3>
+              <div style={{ paddingLeft: '0.5rem' }}>
+                Die Verarbeitung erfolgt auf Basis von Art. 6 DSGVO (Vertragserfüllung, berechtigtes Interesse)<br />
+                und — sofern erforderlich — mit Einwilligung (Art. 6 Abs. 1 lit. a).
+              </div>
+            </div>
 
-    <h3>4. Rechtsgrundlage</h3>
-    <p>
-      Die Verarbeitung erfolgt auf Basis von Art. 6 DSGVO (Vertragserfüllung, berechtigtes Interesse) und — sofern erforderlich — mit Einwilligung (Art. 6 Abs. 1 lit. a).
-    </p>
+            <div style={{ marginBottom: '2.2rem' }}>
+              <h3 style={{ margin: '2.2rem 0 0.7rem 0', fontSize: '1.18rem', color: '#1a202c', fontWeight: 700, letterSpacing: '0.01em' }}>5. Speicherdauer</h3>
+              <div style={{ paddingLeft: '0.5rem' }}>
+                Personenbezogene Daten werden nur so lange gespeichert, wie es für die Zwecke erforderlich ist<br />
+                oder gesetzliche Aufbewahrungsfristen bestehen.
+              </div>
+            </div>
 
-    <h3>5. Speicherdauer</h3>
-    <p>
-      Personenbezogene Daten werden nur so lange gespeichert, wie es für die Zwecke erforderlich ist oder gesetzliche Aufbewahrungsfristen bestehen.
-    </p>
-
-    <h3>6. Deine Rechte</h3>
-    <p>
-      Du hast das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch. Zur Ausübung wende dich an info@lu2adevelopment.de.
-    </p>
-
-    <p style={{ marginTop: '1.5rem' }}>
-      Diese Datenschutzerklärung ist eine kurze, anwendungsbezogene Fassung. Sie ersetzt keine vollständige rechtliche Prüfung.
-    </p>
+            <div style={{ marginBottom: '2.2rem' }}>
+              <h3 style={{ margin: '2.2rem 0 0.7rem 0', fontSize: '1.18rem', color: '#1a202c', fontWeight: 700, letterSpacing: '0.01em' }}>6. Deine Rechte</h3>
+              <ul style={{ margin: 0, paddingLeft: '1.2rem', listStyle: 'disc' }}>
+                <li>Auskunft</li>
+                <li>Berichtigung</li>
+                <li>Löschung</li>
+                <li>Einschränkung der Verarbeitung</li>
+                <li>Datenübertragbarkeit</li>
+                <li>Widerspruch</li>
+              </ul>
+              <div style={{ paddingLeft: '0.5rem', marginTop: '0.7rem' }}>
+                Zur Ausübung wende dich an <a href="mailto:info@lu2adevelopment.de" style={{ color: '#2563eb', textDecoration: 'underline' }}>info@lu2adevelopment.de</a>.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
   </div>
 );
 
