@@ -3,12 +3,12 @@ import styles from '../../pages/Admin.module.css';
 import { api } from '../../lib/api';
 import type { Event, DayPlan } from '../../types/event';
 import type { ScheduleItem } from '../../types/schedule';
-import { 
-  Calendar, 
-  ChevronLeft, 
-  CheckCircle, 
-  Users, 
-  Clock, 
+import {
+  Calendar,
+  ChevronLeft,
+  CheckCircle,
+  Users,
+  Clock,
   X,
   ArrowRight,
   Star,
@@ -27,32 +27,32 @@ interface Props {
 }
 
 const WIZARD_STEPS = [
-  { 
-    title: 'Veranstaltung', 
+  {
+    title: 'Veranstaltung',
     icon: Users,
     description: 'Grundlegende Informationen zur Veranstaltung',
     shortDesc: 'Veranstaltungsdetails'
   },
-  { 
-    title: 'Tagesplan', 
+  {
+    title: 'Tagesplan',
     icon: Calendar,
     description: 'Datum und Name für den Tagesplan festlegen',
     shortDesc: 'Tagesplan erstellen'
   },
-  { 
-    title: 'Termine', 
+  {
+    title: 'Termine',
     icon: Clock,
     description: 'Zeitplan mit Aktivitäten und Terminen erstellen',
     shortDesc: 'Zeitplan organisieren'
   }
 ];
 
-const EventCreationWizard: React.FC<Props> = ({ 
-  organizationId, 
-  onClose, 
-  onCreated, 
-  editingEvent = null, 
-  editingDayPlan = null 
+const EventCreationWizard: React.FC<Props> = ({
+  organizationId,
+  onClose,
+  onCreated,
+  editingEvent = null,
+  editingDayPlan = null
 }) => {
   // Determine initial step based on editing mode
   const getInitialStep = () => {
@@ -60,7 +60,7 @@ const EventCreationWizard: React.FC<Props> = ({
     if (editingEvent) return 1; // Go to day plan selection/creation
     return 0; // Normal creation flow
   };
-  
+
   const [step, setStep] = useState(getInitialStep());
   const [createdEvent, setCreatedEvent] = useState<Event | null>(editingEvent);
   const [createdDayPlan, setCreatedDayPlan] = useState<DayPlan | null>(editingDayPlan);
@@ -74,9 +74,9 @@ const EventCreationWizard: React.FC<Props> = ({
 
   // Enhanced progress indicator component
   const ProgressIndicator = () => (
-    <div className={styles.adminCard} style={{ 
-      width: '100%', 
-      maxWidth: '1000px', 
+    <div className={styles.adminCard} style={{
+      width: '100%',
+      maxWidth: '1000px',
       margin: '0 auto 2rem',
       transform: 'rotate(0deg)',
       background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
@@ -84,11 +84,11 @@ const EventCreationWizard: React.FC<Props> = ({
       boxShadow: '0 6px 20px rgba(0,0,0,0.1), 0 2px 6px rgba(0,0,0,0.05)'
     }}>
       <div className={styles.tape} aria-hidden="true" />
-      
+
       {/* Header */}
-      <div style={{ 
-        display: 'flex', 
-        alignItems: 'center', 
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
         justifyContent: 'center',
         gap: '0.75rem',
         marginBottom: '2rem',
@@ -103,7 +103,7 @@ const EventCreationWizard: React.FC<Props> = ({
         }}>
           <Sparkles size={24} color="#fff" />
         </div>
-        <h2 className={styles.cardTitle} style={{ 
+        <h2 className={styles.cardTitle} style={{
           fontSize: '1.6rem',
           margin: 0,
           color: '#1e40af'
@@ -113,7 +113,7 @@ const EventCreationWizard: React.FC<Props> = ({
       </div>
 
       {/* Step Progress Bar */}
-      <div style={{ 
+      <div style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -126,7 +126,7 @@ const EventCreationWizard: React.FC<Props> = ({
           const isActive = index === step;
           const isCompleted = index < step || (index === step && step === 2 && createdDayPlan);
           const isAccessible = index <= step || (index === 2 && createdDayPlan);
-          
+
           return (
             <React.Fragment key={stepData.title}>
               <div style={{
@@ -146,23 +146,23 @@ const EventCreationWizard: React.FC<Props> = ({
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  background: isCompleted 
-                    ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' 
-                    : isActive 
-                    ? 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)' 
-                    : '#fff',
+                  background: isCompleted
+                    ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
+                    : isActive
+                      ? 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)'
+                      : '#fff',
                   color: isCompleted || isActive ? '#fff' : '#64748b',
-                  boxShadow: isActive 
-                    ? '0 6px 20px rgba(59, 130, 246, 0.4), 0 0 0 4px rgba(59, 130, 246, 0.1)' 
-                    : isCompleted 
-                    ? '0 4px 12px rgba(16, 185, 129, 0.3)' 
-                    : '0 2px 8px rgba(0,0,0,0.1)',
+                  boxShadow: isActive
+                    ? '0 6px 20px rgba(59, 130, 246, 0.4), 0 0 0 4px rgba(59, 130, 246, 0.1)'
+                    : isCompleted
+                      ? '0 4px 12px rgba(16, 185, 129, 0.3)'
+                      : '0 2px 8px rgba(0,0,0,0.1)',
                   transform: isActive ? 'scale(1.1)' : 'scale(1)',
                   transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                 }}>
                   {isCompleted ? <CheckCircle size={24} /> : <StepIcon size={24} />}
                 </div>
-                
+
                 {/* Step Label */}
                 <div style={{
                   textAlign: 'center',
@@ -187,7 +187,7 @@ const EventCreationWizard: React.FC<Props> = ({
                   </div>
                 </div>
               </div>
-              
+
               {/* Arrow between steps */}
               {index < WIZARD_STEPS.length - 1 && (
                 <div style={{
@@ -234,9 +234,9 @@ const EventCreationWizard: React.FC<Props> = ({
 
   // Enhanced navigation component
   const Navigation = () => (
-    <div style={{ 
-      display: 'flex', 
-      justifyContent: 'space-between', 
+    <div style={{
+      display: 'flex',
+      justifyContent: 'space-between',
       alignItems: 'center',
       marginBottom: '2rem',
       maxWidth: '1000px',
@@ -245,7 +245,7 @@ const EventCreationWizard: React.FC<Props> = ({
       flexWrap: 'wrap'
     }}>
       {/* Back Button */}
-      <button 
+      <button
         onClick={goBack}
         style={{
           padding: '0.875rem 1.5rem',
@@ -276,10 +276,10 @@ const EventCreationWizard: React.FC<Props> = ({
           e.currentTarget.style.backgroundColor = '#fff';
         }}
       >
-        <ChevronLeft size={20} /> 
+        <ChevronLeft size={20} />
         {step === 0 ? 'Schließen' : 'Zurück'}
       </button>
-      
+
       {/* Progress Dots (Mobile Alternative) */}
       <div style={{
         display: 'flex',
@@ -304,9 +304,9 @@ const EventCreationWizard: React.FC<Props> = ({
           />
         ))}
       </div>
-      
+
       {/* Close Button */}
-      <button 
+      <button
         onClick={onClose}
         style={{
           padding: '0.875rem 1.25rem',
@@ -350,9 +350,9 @@ const EventCreationWizard: React.FC<Props> = ({
       if (editingEvent) {
         // Update existing event
         console.log('Updating event:', editingEvent.id, eventData);
-        const updated = await api.updateEvent(editingEvent.id, { 
-          name: eventData.name, 
-          description: eventData.description 
+        const updated = await api.updateEvent(editingEvent.id, {
+          name: eventData.name,
+          description: eventData.description
         });
         const updatedEvent: Event = {
           ...editingEvent,
@@ -364,7 +364,7 @@ const EventCreationWizard: React.FC<Props> = ({
         onCreated(updatedEvent);
         return;
       }
-      
+
       const created = await api.createEvent(organizationId, { name: eventData.name, description: eventData.description });
       const newEvent: Event = {
         id: created.id,
@@ -395,7 +395,7 @@ const EventCreationWizard: React.FC<Props> = ({
           date: dayPlanData.date,
           schedule: dayPlanData.scheduleItems
         });
-        
+
         const updatedDayPlan: DayPlan = {
           id: updated.id,
           eventId: updated.eventId,
@@ -410,13 +410,13 @@ const EventCreationWizard: React.FC<Props> = ({
         setStep(2);
         return;
       }
-      
-      const created = await api.createDayPlan(createdEvent.id, { 
-        name: dayPlanData.name, 
-        date: dayPlanData.date, 
+
+      const created = await api.createDayPlan(createdEvent.id, {
+        name: dayPlanData.name,
+        date: dayPlanData.date,
         schedule: dayPlanData.scheduleItems
       });
-      
+
       const newDayPlan: DayPlan = {
         id: created.id,
         eventId: createdEvent.id,
@@ -441,7 +441,7 @@ const EventCreationWizard: React.FC<Props> = ({
       const updated = await api.updateDayPlan(createdDayPlan.id, {
         schedule: schedule
       });
-      
+
       const updatedDayPlan: DayPlan = {
         id: updated.id,
         eventId: updated.eventId,
@@ -451,7 +451,7 @@ const EventCreationWizard: React.FC<Props> = ({
         createdAt: updated.createdAt,
         updatedAt: updated.updatedAt,
       };
-      
+
       setCreatedDayPlan(updatedDayPlan);
       const finalEvent: Event = {
         ...createdEvent,
@@ -464,7 +464,7 @@ const EventCreationWizard: React.FC<Props> = ({
   };
 
   return (
-    <div style={{ 
+    <div style={{
       minHeight: '100vh',
       background: 'repeating-linear-gradient(0deg, var(--color-paper) 0px, var(--color-paper) 39px, #e5e7eb 40px, var(--color-paper) 41px)',
       padding: '1.5rem 1rem 3rem',
@@ -482,7 +482,7 @@ const EventCreationWizard: React.FC<Props> = ({
         zIndex: 0,
         animation: 'float 6s ease-in-out infinite'
       }} />
-      
+
       <div style={{
         position: 'absolute',
         bottom: '15vh',
@@ -562,8 +562,8 @@ const EventCreationWizard: React.FC<Props> = ({
         `}
       </style>
 
-      <div style={{ 
-        width: '100%', 
+      <div style={{
+        width: '100%',
         maxWidth: '1200px',
         margin: '0 auto',
         position: 'relative',
@@ -573,8 +573,8 @@ const EventCreationWizard: React.FC<Props> = ({
         <Navigation />
 
         {/* Enhanced step content with better transitions */}
-        <div style={{ 
-          display: 'flex', 
+        <div style={{
+          display: 'flex',
           justifyContent: 'center',
           minHeight: '500px',
           position: 'relative'
@@ -625,147 +625,17 @@ const EventCreationWizard: React.FC<Props> = ({
             {/* Step 3: Schedule Manager */}
             {step === 2 && (createdDayPlan || editingDayPlan) && (
               <div style={{
-                animation: 'slideInFromBottom 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                animation: 'slideInFromLeft 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+                display: 'flex',
+                justifyContent: 'center',
                 width: '100%'
               }}>
-                {/* Schedule Header */}
-                <div className={styles.adminCard} style={{
-                  marginBottom: '2rem',
-                  transform: 'rotate(0deg)',
-                  background: 'linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)',
-                  border: '3px solid #10b981',
-                  maxWidth: '800px',
-                  margin: '0 auto 2rem'
-                }}>
-                  <div className={styles.tape} aria-hidden="true" />
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.75rem',
-                    marginBottom: '1rem'
-                  }}>
-                    <div style={{
-                      background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                      borderRadius: '50%',
-                      padding: '0.75rem',
-                      border: '2px solid var(--color-ink)'
-                    }}>
-                      <Clock size={24} color="#fff" />
-                    </div>
-                    <h3 className={styles.cardTitle} style={{
-                      fontSize: '1.4rem',
-                      margin: 0,
-                      color: '#047857'
-                    }}>
-                      Zeitplan für "{(createdDayPlan || editingDayPlan)?.name}"
-                    </h3>
-                  </div>
-                  <p style={{
-                    color: '#065f46',
-                    fontSize: '1rem',
-                    fontFamily: '"Inter", "Roboto", Arial, sans-serif',
-                    margin: 0,
-                    lineHeight: '1.5'
-                  }}>
-                    Erstelle und organisiere die Termine für deinen Tagesplan. 
-                    Du kannst Zeiten hinzufügen, bearbeiten und die Reihenfolge anpassen.
-                  </p>
-                </div>
-                
-                {/* Schedule Manager */}
-                <ScheduleManager
-                  schedule={(createdDayPlan || editingDayPlan)?.scheduleItems || []}
-                  onSave={handleSaveSchedule}
-                  onCancel={() => setStep(1)}
-                />
-                
-                {/* Completion Card */}
-                <div style={{ 
-                  display: 'flex', 
-                  justifyContent: 'center', 
-                  marginTop: '3rem' 
-                }}>
-                  <div className={styles.adminCard} style={{
-                    padding: '2.5rem',
-                    maxWidth: '500px',
-                    textAlign: 'center',
-                    transform: 'rotate(0deg)',
-                    background: 'linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%)',
-                    border: '3px solid #f59e0b'
-                  }}>
-                    <div className={styles.tape} aria-hidden="true" />
-                    
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '1rem',
-                      marginBottom: '1.5rem'
-                    }}>
-                      <div style={{
-                        background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-                        borderRadius: '50%',
-                        padding: '1rem',
-                        border: '3px solid var(--color-ink)',
-                        animation: 'bounce 2s ease-in-out infinite'
-                      }}>
-                        <Star size={32} color="#fff" />
-                      </div>
-                      <h3 className={styles.cardTitle} style={{
-                        fontSize: '1.5rem',
-                        color: '#92400e',
-                        margin: 0
-                      }}>
-                        Fast geschafft!
-                      </h3>
-                    </div>
-                    
-                    <p style={{
-                      marginBottom: '2rem',
-                      fontSize: '1.1rem',
-                      color: '#b45309',
-                      fontFamily: '"Inter", "Roboto", Arial, sans-serif',
-                      lineHeight: '1.6'
-                    }}>
-                      Deine Veranstaltung ist bereit! Klicke auf "Fertigstellen" 
-                      um alles zu speichern und die Veranstaltung zu erstellen.
-                    </p>
-                    
-                    <button
-                      onClick={() => handleSaveSchedule((createdDayPlan || editingDayPlan)?.scheduleItems || [])}
-                      style={{
-                        padding: '1.25rem 2.5rem',
-                        border: '3px solid var(--color-ink)',
-                        borderRadius: '16px',
-                        backgroundColor: '#f59e0b',
-                        color: '#fff',
-                        fontWeight: '700',
-                        fontFamily: '"Gloria Hallelujah", "Caveat", "Comic Neue", cursive, sans-serif',
-                        fontSize: '1.3rem',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '1rem',
-                        cursor: 'pointer',
-                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                        boxShadow: '0 6px 0 var(--color-ink), 0 4px 20px rgba(245, 158, 11, 0.3)',
-                        width: '100%',
-                        justifyContent: 'center'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = 'translateY(-3px) scale(1.02)';
-                        e.currentTarget.style.boxShadow = '0 9px 0 var(--color-ink), 0 6px 25px rgba(245, 158, 11, 0.4)';
-                        e.currentTarget.style.backgroundColor = '#d97706';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.transform = 'translateY(0) scale(1)';
-                        e.currentTarget.style.boxShadow = '0 6px 0 var(--color-ink), 0 4px 20px rgba(245, 158, 11, 0.3)';
-                        e.currentTarget.style.backgroundColor = '#f59e0b';
-                      }}
-                    >
-                      <CheckCircle size={28} /> 
-                      {editingEvent || editingDayPlan ? 'Änderungen speichern' : 'Veranstaltung fertigstellen'}
-                    </button>
-                  </div>
+                <div style={{ width: '100%', maxWidth: '600px' }}>
+                  <ScheduleManager
+                    schedule={(createdDayPlan || editingDayPlan)?.scheduleItems || []}
+                    onSave={() => handleSaveSchedule((createdDayPlan || editingDayPlan)?.scheduleItems || [])}
+                    onCancel={() => setStep(1)}
+                  />
                 </div>
               </div>
             )}
