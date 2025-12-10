@@ -263,27 +263,34 @@ const Dashboard: React.FC = () => {
         facilitator: item.facilitator,
       })) || [];
 
-      await api.updateDayPlan(editingDayPlan.id, {
+      const updated = await api.updateDayPlan(editingDayPlan.id, {
         name: dayPlanData.name,
         date: dayPlanData.date,
         schedule: scheduleForApi
       });
 
+      // Use the response from API to ensure we have the correct data structure
+      const updatedDayPlan: DayPlan = {
+        id: updated.id,
+        eventId: updated.eventId,
+        name: updated.name,
+        date: updated.date,
+        scheduleItems: updated.scheduleItems || [],
+        createdAt: updated.createdAt,
+        updatedAt: updated.updatedAt,
+      };
+
       const updatedEvents = events.map((e) =>
         e.id === selectedEvent.id
           ? {
-            ...e,
-            dayPlans: e.dayPlans.map((d) =>
-              d.id === editingDayPlan.id
-                ? {
-                  ...d,
-                  ...dayPlanData,
-                  updatedAt: new Date().toISOString()
-                }
-                : d
-            ),
-            updatedAt: new Date().toISOString(),
-          }
+              ...e,
+              dayPlans: e.dayPlans.map((d) =>
+                d.id === editingDayPlan.id
+                  ? updatedDayPlan
+                  : d
+              ),
+              updatedAt: new Date().toISOString(),
+            }
           : e
       );
       setEventsState(updatedEvents);
@@ -1044,15 +1051,30 @@ const Dashboard: React.FC = () => {
 
         {/* Content Grid */}
 
-        <LivePlanControl
-          isConnected={isDisplayConnected}
-          delayActive={delayActive}
-          onDelay={() => setDelayActive((prev) => !prev)}
-          onSendUpdate={() => window.alert("Änderungen wurden live gesendet!")}
-          displayName={"Demo-Display"}
-          planName={selectedEvent?.dayPlans?.[0]?.name || ""}
-          eventName={selectedEvent?.name || ""}
-        />
+        {orgId && (
+          <LivePlanControl
+            organisationId={orgId}
+            selectedDayPlanId={selectedEvent?.dayPlans?.[0]?.id || null}
+            onDelay={(minutes) => {
+              setDelayActive(true);
+              window.alert(`Zeitverzögerung von ${minutes} Minuten wurde hinzugefügt!`);
+            }}
+            onShowPlan={() => {
+              if (selectedEvent?.dayPlans?.[0]?.id) {
+                navigate(`/planner?dayPlanId=${selectedEvent.dayPlans[0].id}&org=${orgId}`);
+              } else {
+                window.alert("Bitte wählen Sie zuerst eine Veranstaltung mit einem Tagesplan aus.");
+              }
+            }}
+            onEditPlan={() => {
+              if (selectedEvent?.dayPlans?.[0]?.id) {
+                setManagingSchedule(selectedEvent.dayPlans[0]);
+              } else {
+                window.alert("Bitte wählen Sie zuerst eine Veranstaltung mit einem Tagesplan aus.");
+              }
+            }}
+          />
+        )}
 
         {/* Add spacing between live controls and Veranstaltungen */}
         <div style={{ height: "2.5rem" }} />
@@ -1730,7 +1752,7 @@ const Dashboard: React.FC = () => {
                             <button
                               onClick={() => {
                                 setEditingDayPlan(dayPlan);
-                                setShowWizard(true);
+                                setShowDayPlanForm(true);
                               }}
                               style={{
                                 padding: "0.5rem",

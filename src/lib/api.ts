@@ -330,5 +330,39 @@ export const api = {
       body: JSON.stringify({ organisationId }),
     });
   },
+
+  updateDisplay(displayId: string, data: { name?: string; currentDayPlanId?: string | null; isActive?: boolean }): Promise<Display> {
+    return json<Display>(`/displays/${displayId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+  },
+
+  deleteDisplay(displayId: string): Promise<{ success: boolean; message: string }> {
+    return json<{ success: boolean; message: string }>(`/displays/${displayId}`, {
+      method: 'DELETE',
+    });
+  },
+
+  sendDayPlanUpdate(organisationId: string, dayPlanId: string): Promise<{ success: boolean; message: string }> {
+    return json<{ success: boolean; message: string }>(`/organisations/${organisationId}/displays/send-update`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ dayPlanId }),
+    });
+  },
+
+  disconnectDisplay(displayId: string): Promise<{ success: boolean; message: string; display: Display }> {
+    return json<{ success: boolean; message: string; display: Display }>(`/displays/pairing/${displayId}/disconnect`, {
+      method: 'POST',
+    });
+  },
+
+  resetDisplay(displayId: string): Promise<{ success: boolean; message: string; code: string; deviceId: string }> {
+    return json<{ success: boolean; message: string; code: string; deviceId: string }>(`/displays/pairing/${displayId}/reset`, {
+      method: 'POST',
+    });
+  },
 };
 
