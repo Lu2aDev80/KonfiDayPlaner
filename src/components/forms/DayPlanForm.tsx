@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Calendar, ChevronRight } from 'lucide-react';
 // ...existing code...
 import type { Event, DayPlan } from '../../types/event';

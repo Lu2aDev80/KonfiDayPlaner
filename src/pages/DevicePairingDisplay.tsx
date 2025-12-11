@@ -13,7 +13,7 @@ interface StatusResponse {
   dayPlan: DayPlan | null;
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || '/minihackathon/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 const POLL_INTERVAL = 3000; // Poll every 3 seconds
 
 const DevicePairingDisplay = () => {
@@ -241,7 +241,7 @@ const DevicePairingDisplay = () => {
 
     setResetting(true);
     try {
-      const result = await api.resetDisplay(deviceId);
+      await api.resetDisplay(deviceId); // eslint-disable-line @typescript-eslint/no-unused-vars
       
       // Clear local storage
       localStorage.removeItem('displayId');
@@ -249,14 +249,22 @@ const DevicePairingDisplay = () => {
       localStorage.removeItem('displayOrgId');
       localStorage.removeItem('assignedDayPlan');
       
-      // Reset state with new device info
-      setDeviceId(result.deviceId);
-      setPairingCode(result.code);
+      // Instead of forcing immediate re-pairing, show the display as if the event ended
+      // by assigning a minimal day plan with a past date so the UI renders the 'ended' view.
+      const pastDate = new Date();
+      pastDate.setDate(pastDate.getDate() - 1);
+
+      setDeviceId('');
+      setPairingCode('');
       setIsPaired(false);
-      setAssignedDayPlan(null);
+      setAssignedDayPlan({
+        name: 'Display zurückgesetzt',
+        date: pastDate.toISOString(),
+        scheduleItems: [],
+      } as any);
       setShowSettings(false);
-      
-      alert('Display erfolgreich zurückgesetzt. Bitte koppeln Sie das Display neu.');
+
+      alert('Display erfolgreich zurückgesetzt. Auf dem Display wird der Event-Status als beendet angezeigt.');
     } catch (error: any) {
       console.error('Failed to reset display:', error);
       alert('Fehler beim Zurücksetzen des Displays. Bitte versuchen Sie es erneut.');

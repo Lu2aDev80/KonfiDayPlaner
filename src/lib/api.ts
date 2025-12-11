@@ -46,9 +46,10 @@ export type AcceptInvitationResponse = {
 };
 
 // Get API base URL from environment or use the base path for local development
-// In production with absolute URL: https://lu2adevelopment.de/minihackathon/api
-// In development or fallback: /minihackathon/api (relative to current origin)
-const API_BASE_URL = import.meta.env.VITE_API_URL || '/minihackathon/api';
+
+// In production mit absoluter URL: https://chaos-ops.de/api
+// In Entwicklung oder Fallback: /api (relativ zur aktuellen Origin)
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 // Log the API URL in development for debugging
 if (import.meta.env.DEV) {
@@ -63,20 +64,29 @@ async function json<T>(input: RequestInfo, init?: RequestInit): Promise<T> {
   }
   
   const res = await fetch(url, { credentials: "include", ...init });
+  let isJson = res.headers.get("content-type")?.includes("application/json");
   if (!res.ok) {
     let err: { error: string } | null = null;
-    try {
-      err = await res.json();
-    } catch {
-      // ignore
+    if (isJson) {
+      try {
+        err = await res.json();
+      } catch {
+        // ignore
+      }
+    } else {
+      const text = await res.text();
+      err = { error: text };
     }
-    
-    // Create error with full error response data for special cases (like email verification)
     const error: Error & { data?: { error: string } } = new Error(err?.error || res.statusText);
-    error.data = err || undefined; // Include full error response data
+    error.data = err || undefined;
     throw error;
   }
-  return res.json();
+  if (isJson) {
+    return res.json();
+  } else {
+    const text = await res.text();
+    throw new Error(`Expected JSON but got: ${text.substring(0, 100)}`);
+  }
 }
 
 export const api = {
