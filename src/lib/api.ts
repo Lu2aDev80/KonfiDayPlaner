@@ -49,7 +49,7 @@ export type AcceptInvitationResponse = {
 
 // In production mit absoluter URL: https://chaos-ops.de/api
 // In Entwicklung oder Fallback: /api (relativ zur aktuellen Origin)
-const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 // Log the API URL in development for debugging
 if (import.meta.env.DEV) {

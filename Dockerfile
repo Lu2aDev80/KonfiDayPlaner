@@ -17,8 +17,10 @@ RUN npm ci
 COPY . .
 
 # Set build-time environment variables for Vite
-ARG VITE_API_BASE_URL=/
+ARG VITE_API_BASE_URL=/api
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+ARG VITE_BASE_PATH=/
+ENV VITE_BASE_PATH=$VITE_BASE_PATH
 
 # Build the application
 RUN npm run build
@@ -26,8 +28,7 @@ RUN npm run build
 ########## Production stage ##########
 FROM nginx:alpine
 
-# Copy built files to the target subfolder expected by base path
-RUN mkdir -p /usr/share/nginx/html
+# Copy built files to nginx html directory
 COPY --from=builder /usr/src/app/dist /usr/share/nginx/html
 
 # Copy nginx configuration

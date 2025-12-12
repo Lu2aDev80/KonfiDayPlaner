@@ -8,17 +8,9 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App.tsx'
 import { AuthProvider } from "./context/AuthContext";
 
-  <StrictMode>
-    <BrowserRouter basename="">
-      <AuthProvider>
-        <App />
-      </AuthProvider>
-    </BrowserRouter>
-  </StrictMode>
-
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.VITE_BASE_PATH || ""}>
       <AuthProvider>
         <App />
       </AuthProvider>

@@ -217,8 +217,8 @@ export function renderVerificationEmail(userName: string, organisationName: stri
           © 2025 Lu2a Development | Chaos Ops
         </mj-text>
         <mj-text align="center" padding="10px 0 0 0">
-          <a href="https://lu2adevelopment.de/cahos-ops" style="color: #2563eb; text-decoration: none; font-weight: 600; font-family: 'Inter', 'Roboto', Arial, sans-serif;">
-            lu2adevelopment.de
+          <a href="https://chaos-ops.de" style="color: #2563eb; text-decoration: none; font-weight: 600; font-family: 'Inter', 'Roboto', Arial, sans-serif;">
+            chaos-ops.de
           </a>
         </mj-text>
       </mj-column>
