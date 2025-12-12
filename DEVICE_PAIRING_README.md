@@ -71,12 +71,12 @@ VITE_API_URL=http://localhost:3000
 ## Verwendung
 
 ### Display registrieren
-1. Öffne auf dem Display: `http://localhost:5173/minihackathon/register-display`
+1. Öffne auf dem Display: `http://localhost:5173/cahos-ops/register-display`
 2. Ein 6-stelliger Code und QR-Code werden angezeigt
 3. Warte auf Kopplung durch Admin
 
 ### Device koppeln (Admin)
-1. Öffne: `http://localhost:5173/minihackathon/admin/settings?org=<ORG_ID>`
+1. Öffne: `http://localhost:5173/cahos-ops/admin/settings?org=<ORG_ID>`
 2. Integriere `<DevicePairingAdmin />` Komponente
 3. Scanne QR-Code oder gib Code manuell ein
 4. Klicke "Display koppeln"
@@ -89,7 +89,7 @@ import { DevicePairingDisplay } from './pages';
 
 // Route Configuration
 {
-  path: '/minihackathon/register-display',
+  path: '/cahos-ops/register-display',
   element: <DevicePairingDisplay />
 }
 ```
@@ -198,12 +198,12 @@ npm run dev
 
 ### 3. Display-Seite öffnen
 ```
-http://localhost:5173/minihackathon/register-display
+http://localhost:5173/cahos-ops/register-display
 ```
 
 ### 4. Admin-Seite öffnen
 ```
-http://localhost:5173/minihackathon/admin/settings?org=<ORG_ID>
+http://localhost:5173/cahos-ops/admin/settings?org=<ORG_ID>
 ```
 
 ### 5. Code eingeben oder scannen

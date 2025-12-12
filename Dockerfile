@@ -17,7 +17,7 @@ RUN npm ci
 COPY . .
 
 # Set build-time environment variables for Vite
-ARG VITE_API_BASE_URL=/minihackathon
+ARG VITE_API_BASE_URL=/cahos-ops
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 
 # Build the application
@@ -27,8 +27,8 @@ RUN npm run build
 FROM nginx:alpine
 
 # Copy built files to the target subfolder expected by base path
-RUN mkdir -p /usr/share/nginx/html/minihackathon
-COPY --from=builder /usr/src/app/dist /usr/share/nginx/html/minihackathon
+RUN mkdir -p /usr/share/nginx/html/cahos-ops
+COPY --from=builder /usr/src/app/dist /usr/share/nginx/html/cahos-ops
 
 # Copy nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf

@@ -56,9 +56,9 @@ docker-compose logs --tail=10 app
 
 Write-Host "`n=== Verification Steps ===" -ForegroundColor Cyan
 Write-Host "1. Clear browser cache"
-Write-Host "2. Navigate to: https://lu2adevelopment.de/minihackathon/"
+Write-Host "2. Navigate to: https://lu2adevelopment.de/cahos-ops/"
 Write-Host "3. Open DevTools (F12) and check console"
 Write-Host "4. Verify no 404 errors"
 Write-Host ""
-Write-Host "Frontend URL: http://localhost:8080/minihackathon/" -ForegroundColor Green
+Write-Host "Frontend URL: http://localhost:8080/cahos-ops/" -ForegroundColor Green
 Write-Host "API Health:   http://localhost:3000/api/health" -ForegroundColor Green

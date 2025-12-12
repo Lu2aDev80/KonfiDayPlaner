@@ -48,7 +48,7 @@ Test-Url "http://localhost:3000/api/health" "API Health Endpoint"
 
 # Check Frontend
 Write-Host "`n3. Checking Frontend..." -ForegroundColor White
-Test-Url "http://localhost:8080/minihackathon/" "Frontend Root"
+Test-Url "http://localhost:8080/cahos-ops/" "Frontend Root"
 
 # Check Database
 Write-Host "`n4. Checking Database..." -ForegroundColor White

@@ -24,7 +24,7 @@ const routes = [
   
   // ... oder mit base path:
   {
-    path: '/minihackathon/register-display',
+    path: '/cahos-ops/register-display',
     element: <DevicePairingDisplay />
   }
 ];
@@ -91,10 +91,10 @@ VITE_API_URL=https://your-production-domain.com
 //    npm run dev
 
 // 3. Öffne Display-Seite:
-//    http://localhost:5173/minihackathon/register-display
+//    http://localhost:5173/cahos-ops/register-display
 
 // 4. Öffne Admin-Seite:
-//    http://localhost:5173/minihackathon/admin/settings?org=<ORG_ID>
+//    http://localhost:5173/cahos-ops/admin/settings?org=<ORG_ID>
 
 // 5. Gib den 6-stelligen Code ein oder scanne den QR-Code
 

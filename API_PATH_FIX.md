@@ -7,7 +7,7 @@ Console errors on live system:
 - `404 Not Found` on `/api/email/test`
 
 ## Root Cause
-Hardcoded API paths without the base path `/minihackathon` in:
+Hardcoded API paths without the base path `/cahos-ops` in:
 - `src/pages/Home.tsx` - Email test endpoint
 - `src/pages/VerifyEmail.tsx` - Verify and resend endpoints
 - `index.html` - Favicon path
@@ -21,7 +21,7 @@ Hardcoded API paths without the base path `/minihackathon` in:
 <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
 
 <!-- After -->
-<link rel="icon" type="image/svg+xml" href="/minihackathon/favicon.svg" />
+<link rel="icon" type="image/svg+xml" href="/cahos-ops/favicon.svg" />
 ```
 
 ### 2. Email Test Endpoint
@@ -73,13 +73,13 @@ docker-compose ps
 docker-compose logs --tail=50 app
 
 # Test the frontend
-curl -I http://localhost:8080/minihackathon/
-curl -I http://localhost:8080/minihackathon/favicon.svg
+curl -I http://localhost:8080/cahos-ops/
+curl -I http://localhost:8080/cahos-ops/favicon.svg
 ```
 
 ### 3. Test in Browser
 1. Clear browser cache (Ctrl+Shift+Delete)
-2. Navigate to `https://lu2adevelopment.de/minihackathon/`
+2. Navigate to `https://lu2adevelopment.de/cahos-ops/`
 3. Open DevTools Console (F12)
 4. Verify no 404 errors
 5. Test API calls:
@@ -91,7 +91,7 @@ curl -I http://localhost:8080/minihackathon/favicon.svg
 
 The `VITE_API_BASE_URL` is set in the Dockerfile:
 ```dockerfile
-ARG VITE_API_BASE_URL=/minihackathon
+ARG VITE_API_BASE_URL=/cahos-ops
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 ```
 
@@ -154,5 +154,5 @@ npm run dev
 # Production build with base path
 npm run build
 npm run preview
-# Visit http://localhost:4173/minihackathon/
+# Visit http://localhost:4173/cahos-ops/
 ```

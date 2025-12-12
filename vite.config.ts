@@ -13,24 +13,24 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
       },
-      // Support deployments that use an APP_BASE_PATH (e.g. /minihackathon)
-      '/minihackathon/api': {
+      // Support deployments that use an APP_BASE_PATH (e.g. /cahos-ops)
+      '/cahos-ops/api': {
         target: 'http://localhost:3000',
         changeOrigin: true,
         secure: false,
-        // Strip the /minihackathon prefix so backend still receives /api/...
-        rewrite: (path) => path.replace(/^\/minihackathon/, ''),
+        // Strip the /cahos-ops prefix so backend still receives /api/...
+        rewrite: (path) => path.replace(/^\/cahos-ops/, ''),
       },
       '/uploads': {
         target: 'http://localhost:3000',
         changeOrigin: true,
         secure: false,
       },
-      '/minihackathon/uploads': {
+      '/cahos-ops/uploads': {
         target: 'http://localhost:3000',
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(/^\/minihackathon/, ''),
+        rewrite: (path) => path.replace(/^\/cahos-ops/, ''),
       },
     },
   },

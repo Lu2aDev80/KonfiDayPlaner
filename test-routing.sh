@@ -7,12 +7,12 @@ echo "1. Testing root redirect..."
 curl -I http://localhost:8080/ 2>/dev/null | head -n 5
 
 echo ""
-echo "2. Testing minihackathon path..."
-curl -I http://localhost:8080/minihackathon/ 2>/dev/null | head -n 5
+echo "2. Testing cahos-ops path..."
+curl -I http://localhost:8080/cahos-ops/ 2>/dev/null | head -n 5
 
 echo ""
 echo "3. Testing verify-email route..."
-curl -I http://localhost:8080/minihackathon/verify-email 2>/dev/null | head -n 5
+curl -I http://localhost:8080/cahos-ops/verify-email 2>/dev/null | head -n 5
 
 echo ""
 echo "4. Testing API health..."
@@ -29,5 +29,5 @@ docker-compose logs --tail=10 app
 echo ""
 echo "=== Access URLs ==="
 echo "Frontend: http://localhost:8080/"
-echo "Admin: http://localhost:8080/minihackathon/login"
+echo "Admin: http://localhost:8080/cahos-ops/login"
 echo "API: http://localhost:3000/api/health"

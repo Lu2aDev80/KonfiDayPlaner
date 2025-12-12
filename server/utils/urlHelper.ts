@@ -12,14 +12,18 @@ interface URLConfig {
  * @returns URLConfig object with frontendHost and basePath
  */
 export function getURLConfig(req?: Request): URLConfig {
-  const basePath = process.env.APP_BASE_PATH || '';
+  let basePath = process.env.APP_BASE_PATH || '';
   const isProduction = process.env.NODE_ENV === 'production';
   
   let frontendHost: string;
 
   if (isProduction) {
-    // Production: Always use lu2adevelopment.de
+    // Production: default to lu2adevelopment.de and the `/cahos-ops` base path
     frontendHost = process.env.FRONTEND_HOST || 'https://lu2adevelopment.de';
+    // If no explicit APP_BASE_PATH provided, use `/cahos-ops` as the default
+    if (!process.env.APP_BASE_PATH) {
+      basePath = '/cahos-ops';
+    }
     logger.debug('Using production frontend host', { frontendHost, basePath });
   } else {
     // Development: Try to detect from request or fallback to localhost
@@ -41,9 +45,11 @@ export function getURLConfig(req?: Request): URLConfig {
     logger.debug('Using development frontend host', { frontendHost, basePath, requestHost: req?.get('host') });
   }
 
+  const basePathNormalized = basePath ? (basePath.startsWith('/') ? basePath : `/${basePath}`) : '';
+
   return {
     frontendHost: frontendHost.replace(/\/$/, ''), // Remove trailing slash
-    basePath: basePath.startsWith('/') ? basePath : `/${basePath}` // Ensure leading slash
+    basePath: basePathNormalized
   };
 }
 
